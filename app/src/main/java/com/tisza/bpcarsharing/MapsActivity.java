@@ -14,7 +14,12 @@ import com.tisza.bpcarsharing.carsharingservice.*;
 
 public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
+	private static final int RELOAD_DELAY_SEC = 20;
+
+	private final Runnable reloadCardsRunnable = this::reloadCars;
+
 	private GoogleMap mMap;
+	private Handler reloadHandler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -27,21 +32,14 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 
 		MapFragment mapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
+
+		reloadHandler = new Handler();
 	}
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
 	{
-		for (int i = 0; i < permissions.length; i++)
-		{
-			if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[i] == PackageManager.PERMISSION_GRANTED)
-			{
-				if (mMap != null)
-				{
-					mMap.setMyLocationEnabled(true);
-				}
-			}
-		}
+		tryEnableMapLocation();
 	}
 
 	/**
@@ -59,13 +57,41 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		mMap = googleMap;
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(47.495225, 19.045508), 12));
 		mMap.setOnInfoWindowClickListener(this);
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-			mMap.setMyLocationEnabled(true);
+		tryEnableMapLocation();
+	}
 
-		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
+	private void tryEnableMapLocation()
+	{
+		if (mMap != null && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+			mMap.setMyLocationEnabled(true);
+	}
+
+	@Override
+	protected void onStart()
+	{
+		super.onStart();
+		reloadCars();
+	}
+
+	@Override
+	protected void onStop()
+	{
+		super.onStop();
+		reloadHandler.removeCallbacks(reloadCardsRunnable);
+	}
+
+	private void reloadCars()
+	{
+		if (mMap != null)
 		{
-			new VechicleListDownloadAsyncTask(carsharingService, mMap).execute();
+			mMap.clear();
+			for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
+			{
+				new VechicleListDownloadAsyncTask(carsharingService, mMap).execute();
+			}
 		}
+
+		reloadHandler.postDelayed(reloadCardsRunnable, RELOAD_DELAY_SEC * 1000);
 	}
 
 	@Override

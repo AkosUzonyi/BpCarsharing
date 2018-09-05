@@ -1,8 +1,12 @@
 package com.tisza.bpcarsharing;
 
+import android.*;
+import android.app.*;
 import android.content.*;
+import android.content.pm.*;
 import android.os.*;
 import android.support.v4.app.*;
+import android.support.v4.content.*;
 import android.widget.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
@@ -17,9 +21,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_maps);
-		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+	{
+		for (int i = 0; i < permissions.length; i++)
+		{
+			if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[i] == PackageManager.PERMISSION_GRANTED)
+			{
+				if (mMap != null)
+				{
+					mMap.setMyLocationEnabled(true);
+				}
+			}
+		}
 	}
 
 	/**
@@ -37,6 +59,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		mMap = googleMap;
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(47.495225, 19.045508), 12));
 		mMap.setOnInfoWindowClickListener(this);
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+			mMap.setMyLocationEnabled(true);
 
 		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
 		{

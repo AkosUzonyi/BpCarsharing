@@ -1,18 +1,15 @@
 package com.tisza.bpcarsharing;
 
-import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
+import android.content.*;
+import android.os.*;
+import android.support.v4.app.*;
+import android.widget.*;
+import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.*;
+import com.tisza.bpcarsharing.carsharingservice.*;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
-
 	private GoogleMap mMap;
 
 	@Override
@@ -38,10 +35,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 	public void onMapReady(GoogleMap googleMap)
 	{
 		mMap = googleMap;
+		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(47.495225, 19.045508), 12));
+		mMap.setOnInfoWindowClickListener(this);
 
-		// Add a marker in Sydney and move the camera
-		LatLng sydney = new LatLng(-34, 151);
-		mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-		mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
+		{
+			new VechicleListDownloadAsyncTask(carsharingService, mMap).execute();
+		}
+	}
+
+	@Override
+	public void onInfoWindowClick(Marker marker)
+	{
+		MarkerTag markerTag = (MarkerTag)marker.getTag();
+
+		Intent launchIntent = getPackageManager().getLaunchIntentForPackage(markerTag.getCarsharingService().getAppPackage());
+		if (launchIntent == null)
+		{
+			Toast.makeText(this, "App not installed", Toast.LENGTH_LONG);
+		}
+		else
+		{
+			startActivity(launchIntent);
+		}
 	}
 }

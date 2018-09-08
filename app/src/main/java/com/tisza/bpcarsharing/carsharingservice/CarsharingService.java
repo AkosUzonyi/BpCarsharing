@@ -1,5 +1,7 @@
 package com.tisza.bpcarsharing.carsharingservice;
 
+import com.tisza.bpcarsharing.*;
+
 import java.util.*;
 
 public interface CarsharingService

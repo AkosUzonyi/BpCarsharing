@@ -1,5 +1,7 @@
 package com.tisza.bpcarsharing;
 
+import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.*;
 import org.json.*;
 
 import java.io.*;
@@ -12,7 +14,7 @@ public class Utils
 		URL url = new URL(urlString);
 		HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
 		urlConnection.setRequestMethod("GET");
-		urlConnection.setReadTimeout(1000);
+		urlConnection.setReadTimeout(5000);
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 		StringBuffer response = new StringBuffer();

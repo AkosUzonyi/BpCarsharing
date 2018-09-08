@@ -12,13 +12,17 @@ import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 import com.tisza.bpcarsharing.carsharingservice.*;
 
+import java.util.*;
+
 public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
 	private static final int RELOAD_DELAY_SEC = 20;
 
 	private final Runnable reloadCardsRunnable = this::reloadCars;
+	private List<VehicleListDownloadAsyncTask> downloadTasks = new ArrayList<>();
 
 	private GoogleMap mMap;
+	private VehicleMarkerManager vehicleMarkerManager;
 	private Handler reloadHandler;
 
 	@Override
@@ -34,6 +38,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		mapFragment.getMapAsync(this);
 
 		reloadHandler = new Handler();
+		vehicleMarkerManager = new VehicleMarkerManager();
 	}
 
 	@Override
@@ -58,6 +63,9 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(47.495225, 19.045508), 12));
 		mMap.setOnInfoWindowClickListener(this);
 		tryEnableMapLocation();
+
+		vehicleMarkerManager.setMap(googleMap);
+		vehicleMarkerManager.populateMap();
 	}
 
 	private void tryEnableMapLocation()
@@ -77,29 +85,40 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	protected void onStop()
 	{
 		super.onStop();
+		cancelDownloadTasks();
 		reloadHandler.removeCallbacks(reloadCardsRunnable);
 	}
 
 	private void reloadCars()
 	{
-		if (mMap != null)
+		reloadHandler.removeCallbacks(reloadCardsRunnable);
+
+		if (!downloadTasks.isEmpty())
 		{
-			mMap.clear();
+			cancelDownloadTasks();
+		}
+		else
+		{
+			vehicleMarkerManager.clearVehicles();
 			for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
-			{
-				new VechicleListDownloadAsyncTask(carsharingService, mMap).execute();
-			}
+				new VehicleListDownloadAsyncTask(carsharingService).execute();
 		}
 
 		reloadHandler.postDelayed(reloadCardsRunnable, RELOAD_DELAY_SEC * 1000);
 	}
 
+	private void cancelDownloadTasks()
+	{
+		for (VehicleListDownloadAsyncTask downloadTask : downloadTasks)
+			downloadTask.cancel(true);
+	}
+
 	@Override
 	public void onInfoWindowClick(Marker marker)
 	{
-		MarkerTag markerTag = (MarkerTag)marker.getTag();
+		Vehicle vehicle = (Vehicle)marker.getTag();
 
-		Intent launchIntent = getPackageManager().getLaunchIntentForPackage(markerTag.getCarsharingService().getAppPackage());
+		Intent launchIntent = getPackageManager().getLaunchIntentForPackage(vehicle.getCarsharingService().getAppPackage());
 		if (launchIntent == null)
 		{
 			Toast.makeText(this, "App not installed", Toast.LENGTH_LONG);
@@ -107,6 +126,46 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		else
 		{
 			startActivity(launchIntent);
+		}
+	}
+
+	private class VehicleListDownloadAsyncTask extends AsyncTask<Void, Void, Void>
+	{
+		private final CarsharingService carsharingService;
+
+		public VehicleListDownloadAsyncTask(CarsharingService carsharingService)
+		{
+			this.carsharingService = carsharingService;
+		}
+
+		@Override
+		protected void onPreExecute()
+		{
+			downloadTasks.add(this);
+		}
+
+		@Override
+		protected Void doInBackground(Void... voids)
+		{
+			for (Vehicle vehicle : carsharingService.downloadVehicles())
+				vehicleMarkerManager.registerVehicle(vehicle);
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result)
+		{
+			downloadTasks.remove(this);
+
+			if (mMap != null && downloadTasks.isEmpty())
+				vehicleMarkerManager.populateMap();
+		}
+
+		@Override
+		protected void onCancelled()
+		{
+			downloadTasks.remove(this);
 		}
 	}
 }

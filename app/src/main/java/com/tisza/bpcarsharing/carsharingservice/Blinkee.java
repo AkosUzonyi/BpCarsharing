@@ -1,6 +1,7 @@
 package com.tisza.bpcarsharing.carsharingservice;
 
 import android.graphics.*;
+import com.google.android.gms.maps.model.*;
 import com.tisza.bpcarsharing.*;
 import org.json.*;
 
@@ -37,14 +38,14 @@ public class Blinkee implements CarsharingService
 
 				JSONObject positionJSON = vehicleJSON.getJSONObject("position");
 
+				String id = vehicleJSON.getString("id");
 				double gps_lat = positionJSON.getDouble("lat");
 				double gps_long = positionJSON.getDouble("lng");
 				String plate_number = "semmi";
 				int battery_level = 100;
 				int estimated_km = 0;
-				int color = getColor();
 
-				vehicles.add(new Vehicle(gps_lat, gps_long, plate_number, battery_level, estimated_km, color));
+				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, battery_level, estimated_km, BitmapDescriptorFactory.HUE_ORANGE));
 			}
 		}
 		catch (JSONException e)

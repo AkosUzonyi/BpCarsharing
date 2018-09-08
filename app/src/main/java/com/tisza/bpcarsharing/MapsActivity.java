@@ -8,6 +8,7 @@ import android.os.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.widget.*;
+import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 import com.tisza.bpcarsharing.carsharingservice.*;
@@ -16,7 +17,13 @@ import java.util.*;
 
 public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
-	private static final int RELOAD_DELAY_SEC = 20;
+
+	private static final int RELOAD_DELAY_SEC = 10;
+	private static final LatLng BP_CENTER = new LatLng(47.495225, 19.045508);
+	private static final LatLngBounds BP_BOUNDS = new LatLngBounds(new LatLng(47.463008, 18.983644), new LatLng(47.550324, 19.157741));
+	private static final int BP_ZOOM = 12, MY_LOCATION_ZOOM = 15;
+
+	private FusedLocationProviderClient fusedLocationClient;
 
 	private final Runnable reloadCardsRunnable = this::reloadCars;
 	private List<VehicleListDownloadAsyncTask> downloadTasks = new ArrayList<>();
@@ -37,6 +44,18 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		MapFragment mapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
+		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+		fusedLocationClient.getLastLocation()
+				.addOnSuccessListener(this, location ->
+				{
+					if (location != null)
+					{
+						LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+						if (BP_BOUNDS.contains(latLng))
+							mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MY_LOCATION_ZOOM));
+					}
+				});
+
 		reloadHandler = new Handler();
 		vehicleMarkerManager = new VehicleMarkerManager();
 	}
@@ -47,20 +66,11 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		tryEnableMapLocation();
 	}
 
-	/**
-	 * Manipulates the map once available.
-	 * This callback is triggered when the map is ready to be used.
-	 * This is where we can add markers or lines, add listeners or move the camera. In this case,
-	 * we just add a marker near Sydney, Australia.
-	 * If Google Play services is not installed on the device, the user will be prompted to install
-	 * it inside the SupportMapFragment. This method will only be triggered once the user has
-	 * installed Google Play services and returned to the app.
-	 */
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
 		mMap = googleMap;
-		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(47.495225, 19.045508), 12));
+		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BP_CENTER, BP_ZOOM));
 		mMap.setOnInfoWindowClickListener(this);
 		tryEnableMapLocation();
 

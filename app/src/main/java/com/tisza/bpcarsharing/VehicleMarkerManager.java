@@ -64,7 +64,8 @@ public class VehicleMarkerManager
 
 			marker.setPosition(position);
 			marker.setTitle(vehicle.getPlate());
-			marker.setSnippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
+			if (vehicle.hasChargeInfo())
+				marker.setSnippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
 			//marker.setAlpha(vehicle.getChargePercentage() / 100F);
 			marker.setIcon(BitmapDescriptorFactory.defaultMarker(vehicle.getHue()));
 			marker.setTag(vehicle);

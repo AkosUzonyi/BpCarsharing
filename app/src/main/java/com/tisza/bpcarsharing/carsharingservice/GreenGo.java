@@ -43,7 +43,7 @@ public class GreenGo implements CarsharingService
 				int battery_level = vehicleJSON.getInt("battery_level");
 				int estimated_km = vehicleJSON.getInt("estimated_km");
 
-				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, battery_level, estimated_km, BitmapDescriptorFactory.HUE_GREEN));
+				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, BitmapDescriptorFactory.HUE_GREEN, battery_level, estimated_km));
 			}
 		}
 		catch (JSONException e)

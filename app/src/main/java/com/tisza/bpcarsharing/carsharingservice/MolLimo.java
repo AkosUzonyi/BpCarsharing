@@ -61,7 +61,7 @@ public class MolLimo implements CarsharingService
 				int battery_level = (int)((float)estimated_km / vehicleModel.maxKm * 100);
 				float hue = vehicleModel.hue;
 
-				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, battery_level, estimated_km, hue));
+				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, hue, battery_level, estimated_km));
 			}
 		}
 		catch (JSONException e)

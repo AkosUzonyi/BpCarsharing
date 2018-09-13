@@ -16,7 +16,7 @@ public class MolLimo implements CarsharingService
 	static
 	{
 		modelNameMap.put("Up", new VehicleModel(BitmapDescriptorFactory.HUE_BLUE, 350));
-		modelNameMap.put("eUp", new VehicleModel(BitmapDescriptorFactory.HUE_AZURE - 20, 100));
+		modelNameMap.put("eUp", new VehicleModel(BitmapDescriptorFactory.HUE_AZURE - 20, 150));
 	}
 
 	@Override

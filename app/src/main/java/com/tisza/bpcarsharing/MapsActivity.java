@@ -139,7 +139,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		}
 	}
 
-	private class VehicleListDownloadAsyncTask extends AsyncTask<Void, Void, Void>
+	private class VehicleListDownloadAsyncTask extends AsyncTask<Void, Void, Collection<Vehicle>>
 	{
 		private final CarsharingService carsharingService;
 
@@ -155,17 +155,17 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		}
 
 		@Override
-		protected Void doInBackground(Void... voids)
+		protected Collection<Vehicle> doInBackground(Void... voids)
 		{
-			for (Vehicle vehicle : carsharingService.downloadVehicles())
-				vehicleMarkerManager.registerVehicle(vehicle);
-
-			return null;
+			return carsharingService.downloadVehicles();
 		}
 
 		@Override
-		protected void onPostExecute(Void result)
+		protected void onPostExecute(Collection<Vehicle> result)
 		{
+			for (Vehicle vehicle : result)
+				vehicleMarkerManager.registerVehicle(vehicle);
+
 			downloadTasks.remove(this);
 
 			if (mMap != null && downloadTasks.isEmpty())

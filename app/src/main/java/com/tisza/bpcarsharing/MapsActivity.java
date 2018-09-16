@@ -131,7 +131,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		Intent launchIntent = getPackageManager().getLaunchIntentForPackage(vehicle.getCarsharingService().getAppPackage());
 		if (launchIntent == null)
 		{
-			Toast.makeText(this, "App not installed", Toast.LENGTH_LONG);
+			Toast.makeText(this, "App not installed", Toast.LENGTH_LONG).show();
 		}
 		else
 		{

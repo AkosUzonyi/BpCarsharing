@@ -12,23 +12,26 @@ public class VehicleMarkerManager
 
 	private GoogleMap map;
 
-	public void clearVehicles()
-	{
-		vehicles.clear();
-	}
-
-	public void registerVehicle(Vehicle vehicle)
-	{
-		vehicles.put(vehicle.getId(), vehicle);
-	}
-
 	public void setMap(GoogleMap map)
 	{
 		this.map = map;
+
+		for (Marker marker : markers.values())
+			marker.remove();
 		markers.clear();
+
+		updateMarkers();
 	}
 
-	public void populateMap()
+	public void setVehicles(Collection<? extends Vehicle> newVehicles)
+	{
+		for (Vehicle vehicle : newVehicles)
+			vehicles.put(vehicle.getId(), vehicle);
+
+		updateMarkers();
+	}
+
+	private void updateMarkers()
 	{
 		if (map == null)
 			return;

@@ -33,6 +33,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 	private DrawerLayout drawerLayout;
 	private GoogleMap mMap;
+	private List<Vehicle> vehicles = new ArrayList<>();
 	private VehicleMarkerManager vehicleMarkerManager;
 	private Handler reloadHandler;
 
@@ -98,7 +99,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		tryEnableMapLocation();
 
 		vehicleMarkerManager.setMap(googleMap);
-		vehicleMarkerManager.populateMap();
 	}
 
 	private void tryEnableMapLocation()
@@ -132,7 +132,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		}
 		else
 		{
-			vehicleMarkerManager.clearVehicles();
+			vehicles.clear();
 			for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
 				new VehicleListDownloadAsyncTask(carsharingService).execute();
 		}
@@ -187,12 +187,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		protected void onPostExecute(Collection<Vehicle> result)
 		{
 			for (Vehicle vehicle : result)
-				vehicleMarkerManager.registerVehicle(vehicle);
+				vehicles.add(vehicle);
 
 			downloadTasks.remove(this);
 
 			if (mMap != null && downloadTasks.isEmpty())
-				vehicleMarkerManager.populateMap();
+				vehicleMarkerManager.setVehicles(vehicles);
 		}
 
 		@Override

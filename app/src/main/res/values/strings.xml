@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">BpCarsharing</string>
     <string name="title_activity_maps">Map</string>
+
+    <string name="vehicles">Járművek</string>
+    <string name="greengo">GreenGo</string>
+    <string name="mollimo_up">MOL Limo Up</string>
+    <string name="mollimo_eup">MOL Limo eUp</string>
+    <string name="blinkee">Blinkee</string>
 </resources>

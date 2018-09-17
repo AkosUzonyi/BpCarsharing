@@ -1,12 +1,15 @@
 package com.tisza.bpcarsharing;
 
 import android.*;
-import android.app.*;
 import android.content.*;
 import android.content.pm.*;
 import android.os.*;
+import android.support.design.widget.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
+import android.support.v4.widget.*;
+import android.support.v7.app.*;
+import android.view.*;
 import android.widget.*;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
@@ -15,7 +18,7 @@ import com.tisza.bpcarsharing.carsharingservice.*;
 
 import java.util.*;
 
-public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
 
 	private static final int RELOAD_DELAY_SEC = 10;
@@ -28,6 +31,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	private final Runnable reloadCardsRunnable = this::reloadCars;
 	private List<VehicleListDownloadAsyncTask> downloadTasks = new ArrayList<>();
 
+	private DrawerLayout drawerLayout;
 	private GoogleMap mMap;
 	private VehicleMarkerManager vehicleMarkerManager;
 	private Handler reloadHandler;
@@ -37,6 +41,8 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_maps);
+
+		drawerLayout = findViewById(R.id.drawer_layout);
 
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
@@ -56,8 +62,25 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 					}
 				});
 
+		setSupportActionBar(findViewById(R.id.toolbar));
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+
 		reloadHandler = new Handler();
 		vehicleMarkerManager = new VehicleMarkerManager();
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch (item.getItemId())
+		{
+			case android.R.id.home:
+				drawerLayout.openDrawer(Gravity.START);
+				return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override

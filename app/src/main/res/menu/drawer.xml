@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <item
+        android:title="@string/vehicles"
+        >
+        <menu>
+            <item
+                android:id="@+id/greengo_switch"
+                android:title="@string/greengo"
+                app:actionLayout="@layout/carsharing_service_switch"
+            />
+            <item
+                android:id="@+id/mollimo_up_switch"
+                android:title="@string/mollimo_up"
+                app:actionLayout="@layout/carsharing_service_switch"
+            />
+            <item
+                android:id="@+id/mollimo_eup_switch"
+                android:title="@string/mollimo_eup"
+                app:actionLayout="@layout/carsharing_service_switch"
+            />
+            <item
+                android:id="@+id/blinkee_swicth"
+                android:title="@string/blinkee"
+                app:actionLayout="@layout/carsharing_service_switch"
+            />
+        </menu>
+    </item>
+</menu>

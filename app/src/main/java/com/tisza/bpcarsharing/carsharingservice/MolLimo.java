@@ -10,13 +10,14 @@ import java.util.*;
 
 public class MolLimo implements CarsharingService
 {
-	private static final VehicleModel defaultModel = new VehicleModel(BitmapDescriptorFactory.HUE_RED, 100);
-	private static final Map<String, VehicleModel> modelNameMap = new HashMap<>();
-
-	static
+	private static VehicleCategory getVehicleCategoryFromModelName(String model)
 	{
-		modelNameMap.put("Up", new VehicleModel(BitmapDescriptorFactory.HUE_BLUE, 350));
-		modelNameMap.put("eUp", new VehicleModel(BitmapDescriptorFactory.HUE_AZURE - 20, 150));
+		switch (model)
+		{
+			case "Up": return VehicleCategory.MOL_LIMO_UP;
+			case "eUp": return VehicleCategory.MOL_LIMO_EUP;
+		}
+		return null;
 	}
 
 	@Override
@@ -43,19 +44,17 @@ public class MolLimo implements CarsharingService
 				JSONObject descriptionJSON = vehicleJSON.getJSONObject("description");
 				JSONObject statusJSON = vehicleJSON.getJSONObject("status");
 
-				VehicleModel vehicleModel = modelNameMap.get(descriptionJSON.getString("model"));
-				if (vehicleModel == null)
-					vehicleModel = defaultModel;
+				VehicleCategory vehicleCategory = getVehicleCategoryFromModelName(descriptionJSON.getString("model"));
+				if (vehicleCategory == null)
+					continue;
 
 				String id = descriptionJSON.getString("id");
 				double gps_lat = positionJSON.getDouble("lat");
 				double gps_long = positionJSON.getDouble("lon");
 				String plate_number = descriptionJSON.getString("name");
 				int estimated_km = statusJSON.getInt("energyLevel");
-				int battery_level = (int)((float)estimated_km / vehicleModel.maxKm * 100);
-				float hue = vehicleModel.hue;
 
-				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, hue, battery_level, estimated_km));
+				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, estimated_km, vehicleCategory));
 			}
 		}
 		catch (JSONException e)
@@ -74,17 +73,5 @@ public class MolLimo implements CarsharingService
 	public String getAppPackage()
 	{
 		return "com.vulog.carshare.mol";
-	}
-
-	private static class VehicleModel
-	{
-		private final float hue;
-		private final int maxKm;
-
-		public VehicleModel(float hue, int maxKm)
-		{
-			this.hue = hue;
-			this.maxKm = maxKm;
-		}
 	}
 }

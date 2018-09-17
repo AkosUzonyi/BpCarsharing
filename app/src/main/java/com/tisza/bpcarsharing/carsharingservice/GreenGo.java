@@ -34,10 +34,9 @@ public class GreenGo implements CarsharingService
 				double gps_lat = vehicleJSON.getDouble("gps_lat");
 				double gps_long = vehicleJSON.getDouble("gps_long");
 				String plate_number = vehicleJSON.getString("plate_number");
-				int battery_level = vehicleJSON.getInt("battery_level");
 				int estimated_km = vehicleJSON.getInt("estimated_km");
 
-				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, BitmapDescriptorFactory.HUE_GREEN, battery_level, estimated_km));
+				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, estimated_km, VehicleCategory.GREENGO));
 			}
 		}
 		catch (JSONException e)

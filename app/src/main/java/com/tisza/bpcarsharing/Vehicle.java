@@ -8,29 +8,28 @@ public class Vehicle
 	private final CarsharingService carsharingService;
 	private final double lat, lng;
 	private final String plate;
-	private final int chargePercentage, range;
+	private final int range;
 	private final boolean hasChargeInfo;
-	private final float hue;
+	private final VehicleCategory category;
 
-	public Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, float hue)
+	public Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, VehicleCategory category)
 	{
-		this(id, carsharingService, lat, lng, plate, hue, 0, 0, false);
+		this(id, carsharingService, lat, lng, plate, 0, category, false);
 	}
 
-	public Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, float hue, int chargePercentage, int range)
+	public Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, int range, VehicleCategory category)
 	{
-		this(id, carsharingService, lat, lng, plate, hue, chargePercentage, range, true);
+		this(id, carsharingService, lat, lng, plate, range, category, true);
 	}
 
-	private Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, float hue, int chargePercentage, int range, boolean hasChargeInfo)
+	private Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, int range, VehicleCategory category, boolean hasChargeInfo)
 	{
 		this.id = id;
 		this.carsharingService = carsharingService;
 		this.lat = lat;
 		this.lng = lng;
 		this.plate = plate;
-		this.hue = hue;
-		this.chargePercentage = chargePercentage;
+		this.category = category;
 		this.range = range;
 		this.hasChargeInfo = hasChargeInfo;
 	}
@@ -60,9 +59,9 @@ public class Vehicle
 		return plate;
 	}
 
-	public float getHue()
+	public VehicleCategory getCategory()
 	{
-		return hue;
+		return category;
 	}
 
 	public boolean hasChargeInfo()
@@ -72,10 +71,7 @@ public class Vehicle
 
 	public int getChargePercentage()
 	{
-		if (!hasChargeInfo)
-			throw new UnsupportedOperationException();
-
-		return chargePercentage;
+		return (int)(getRange() / category.getMaxRange() * 100);
 	}
 
 	public int getRange()

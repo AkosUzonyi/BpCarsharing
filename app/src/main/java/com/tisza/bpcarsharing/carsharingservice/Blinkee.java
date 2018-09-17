@@ -37,7 +37,7 @@ public class Blinkee implements CarsharingService
 				double gps_long = positionJSON.getDouble("lng");
 				String plate_number = "blinkee";
 
-				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, BitmapDescriptorFactory.HUE_ORANGE));
+				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, VehicleCategory.BLINKEE));
 			}
 		}
 		catch (JSONException e)

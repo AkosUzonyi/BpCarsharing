@@ -20,12 +20,6 @@ public class MolLimo implements CarsharingService
 	}
 
 	@Override
-	public int getNameResource()
-	{
-		return 0;
-	}
-
-	@Override
 	public int getColor()
 	{
 		return Color.BLUE;

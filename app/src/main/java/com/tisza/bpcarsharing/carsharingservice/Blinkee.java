@@ -11,12 +11,6 @@ import java.util.*;
 public class Blinkee implements CarsharingService
 {
 	@Override
-	public int getNameResource()
-	{
-		return 0;
-	}
-
-	@Override
 	public int getColor()
 	{
 		return Color.rgb(200, 200, 0);

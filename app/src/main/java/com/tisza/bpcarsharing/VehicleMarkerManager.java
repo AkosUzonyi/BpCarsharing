@@ -25,6 +25,7 @@ public class VehicleMarkerManager
 
 	public void setVehicles(Collection<? extends Vehicle> newVehicles)
 	{
+		vehicles.clear();
 		for (Vehicle vehicle : newVehicles)
 			vehicles.put(vehicle.getId(), vehicle);
 

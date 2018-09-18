@@ -4,7 +4,6 @@ import android.*;
 import android.content.*;
 import android.content.pm.*;
 import android.os.*;
-import android.support.design.widget.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.support.v4.widget.*;
@@ -14,28 +13,21 @@ import android.widget.*;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
-import com.tisza.bpcarsharing.carsharingservice.*;
-
-import java.util.*;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
 
-	private static final int RELOAD_DELAY_SEC = 10;
+	private static final int DOWNLOAD_INTERVAL = 10;
 	private static final LatLng BP_CENTER = new LatLng(47.495225, 19.045508);
 	private static final LatLngBounds BP_BOUNDS = new LatLngBounds(new LatLng(47.463008, 18.983644), new LatLng(47.550324, 19.157741));
 	private static final int BP_ZOOM = 12, MY_LOCATION_ZOOM = 15;
 
 	private FusedLocationProviderClient fusedLocationClient;
 
-	private final Runnable reloadCardsRunnable = this::reloadCars;
-	private List<VehicleListDownloadAsyncTask> downloadTasks = new ArrayList<>();
-
+	private VehicleDownloader vehicleDownloader;
 	private DrawerLayout drawerLayout;
 	private GoogleMap mMap;
-	private List<Vehicle> vehicles = new ArrayList<>();
 	private VehicleMarkerManager vehicleMarkerManager;
-	private Handler reloadHandler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -68,8 +60,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
-		reloadHandler = new Handler();
 		vehicleMarkerManager = new VehicleMarkerManager();
+		vehicleDownloader = new VehicleDownloader(getMainLooper(), DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles);
 	}
 
 	@Override
@@ -111,39 +103,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	protected void onStart()
 	{
 		super.onStart();
-		reloadCars();
+		vehicleDownloader.start();
 	}
 
 	@Override
 	protected void onStop()
 	{
 		super.onStop();
-		cancelDownloadTasks();
-		reloadHandler.removeCallbacks(reloadCardsRunnable);
-	}
-
-	private void reloadCars()
-	{
-		reloadHandler.removeCallbacks(reloadCardsRunnable);
-
-		if (!downloadTasks.isEmpty())
-		{
-			cancelDownloadTasks();
-		}
-		else
-		{
-			vehicles.clear();
-			for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
-				new VehicleListDownloadAsyncTask(carsharingService).execute();
-		}
-
-		reloadHandler.postDelayed(reloadCardsRunnable, RELOAD_DELAY_SEC * 1000);
-	}
-
-	private void cancelDownloadTasks()
-	{
-		for (VehicleListDownloadAsyncTask downloadTask : downloadTasks)
-			downloadTask.cancel(true);
+		vehicleDownloader.stop();
 	}
 
 	@Override
@@ -159,46 +126,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		else
 		{
 			startActivity(launchIntent);
-		}
-	}
-
-	private class VehicleListDownloadAsyncTask extends AsyncTask<Void, Void, Collection<Vehicle>>
-	{
-		private final CarsharingService carsharingService;
-
-		public VehicleListDownloadAsyncTask(CarsharingService carsharingService)
-		{
-			this.carsharingService = carsharingService;
-		}
-
-		@Override
-		protected void onPreExecute()
-		{
-			downloadTasks.add(this);
-		}
-
-		@Override
-		protected Collection<Vehicle> doInBackground(Void... voids)
-		{
-			return carsharingService.downloadVehicles();
-		}
-
-		@Override
-		protected void onPostExecute(Collection<Vehicle> result)
-		{
-			for (Vehicle vehicle : result)
-				vehicles.add(vehicle);
-
-			downloadTasks.remove(this);
-
-			if (mMap != null && downloadTasks.isEmpty())
-				vehicleMarkerManager.setVehicles(vehicles);
-		}
-
-		@Override
-		protected void onCancelled()
-		{
-			downloadTasks.remove(this);
 		}
 	}
 }

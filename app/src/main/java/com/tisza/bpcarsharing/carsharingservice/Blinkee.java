@@ -116,4 +116,10 @@ public class Blinkee implements CarsharingService
 	{
 		return "pl.blinkee.mobile";
 	}
+
+	@Override
+	public int getMenuID()
+	{
+		return R.id.blinkee_swicth;
+	}
 }

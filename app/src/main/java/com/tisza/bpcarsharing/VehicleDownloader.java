@@ -9,25 +9,20 @@ public class VehicleDownloader
 {
 	private final Runnable downloadCarsRunnable = this::downloadCars;
 	private final Handler handler;
+	private final CarsharingService carsharingService;
 	private final VehiclesDownloadedListener vehiclesDownloadedListener;
-	private int downloadInterval;
-	private List<VehicleDownloadAsyncTask> runningDownloadTasks = new ArrayList<>();
-	private Set<VehicleCategory> activeVehicleCategories = new HashSet<>(Arrays.asList(VehicleCategory.values()));
-	private List<Vehicle> downloadedVehicles = new ArrayList<>();
 
-	public VehicleDownloader(Looper looper, int downloadInterval, VehiclesDownloadedListener vehiclesDownloadedListener)
+	private boolean active = false;
+	private int downloadInterval;
+	private VehicleDownloadAsyncTask currentDownloadTask = null;
+	private boolean newDownloadRequestPending = false;
+
+	public VehicleDownloader(Looper looper, CarsharingService carsharingService, int downloadInterval, VehiclesDownloadedListener vehiclesDownloadedListener)
 	{
 		handler = new Handler(looper);
+		this.carsharingService = carsharingService;
 		this.downloadInterval = downloadInterval;
 		this.vehiclesDownloadedListener = vehiclesDownloadedListener;
-	}
-
-	public void setVehicleCategoryActive(VehicleCategory vehicleCategory, boolean active)
-	{
-		if (active)
-			activeVehicleCategories.add(vehicleCategory);
-		else
-			activeVehicleCategories.remove(vehicleCategory);
 	}
 
 	public void setDownloadInterval(int downloadInterval)
@@ -37,12 +32,25 @@ public class VehicleDownloader
 
 	public void start()
 	{
+		if (active)
+			return;
+
+		active = true;
 		downloadCars();
 	}
 
 	public void stop()
 	{
-		cancelDownloadTasks();
+		if (!active)
+			return;
+
+		active = false;
+
+		if (currentDownloadTask != null)
+			currentDownloadTask.cancel(true);
+
+		vehiclesDownloadedListener.onVehiclesDowloaded(Collections.EMPTY_LIST);
+		newDownloadRequestPending = false;
 		handler.removeCallbacks(downloadCarsRunnable);
 	}
 
@@ -50,55 +58,23 @@ public class VehicleDownloader
 	{
 		handler.removeCallbacks(downloadCarsRunnable);
 
-		if (!runningDownloadTasks.isEmpty())
+		if (currentDownloadTask != null)
 		{
-			cancelDownloadTasks();
+			newDownloadRequestPending = true;
+			return;
 		}
-		else
-		{
-			downloadedVehicles.clear();
-			for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
-			{
-				if (hasAnyVehicleCategory(carsharingService.getVehicleCategories()))
-					new VehicleDownloadAsyncTask(carsharingService).execute();
-			}
 
-			if (runningDownloadTasks.isEmpty())
-				vehiclesDownloadedListener.onVehiclesDowloaded(Collections.EMPTY_LIST);
-		}
+		new VehicleDownloadAsyncTask().execute();
 
 		handler.postDelayed(downloadCarsRunnable, downloadInterval * 1000);
 	}
 
-	private boolean hasAnyVehicleCategory(Collection<? extends VehicleCategory> vehicleCategories)
-	{
-		for (VehicleCategory vehicleCategory : vehicleCategories)
-		{
-			if (activeVehicleCategories.contains(vehicleCategory))
-				return true;
-		}
-		return false;
-	}
-
-	private void cancelDownloadTasks()
-	{
-		for (VehicleDownloadAsyncTask downloadTask : runningDownloadTasks)
-			downloadTask.cancel(true);
-	}
-
 	private class VehicleDownloadAsyncTask extends AsyncTask<Void, Void, Collection<Vehicle>>
 	{
-		private final CarsharingService carsharingService;
-
-		public VehicleDownloadAsyncTask(CarsharingService carsharingService)
-		{
-			this.carsharingService = carsharingService;
-		}
-
 		@Override
 		protected void onPreExecute()
 		{
-			runningDownloadTasks.add(this);
+			currentDownloadTask = this;
 		}
 
 		@Override
@@ -108,22 +84,26 @@ public class VehicleDownloader
 		}
 
 		@Override
-		protected void onPostExecute(Collection<Vehicle> result)
+		protected void onPostExecute(Collection<Vehicle> downloadedVehicles)
 		{
-			for (Vehicle vehicle : result)
-				if (activeVehicleCategories.contains(vehicle.getCategory()))
-					downloadedVehicles.add(vehicle);
-
-			runningDownloadTasks.remove(this);
-
-			if (runningDownloadTasks.isEmpty())
-				vehiclesDownloadedListener.onVehiclesDowloaded(downloadedVehicles);
+			vehiclesDownloadedListener.onVehiclesDowloaded(downloadedVehicles);
+			onFinished();
 		}
 
 		@Override
 		protected void onCancelled()
 		{
-			runningDownloadTasks.remove(this);
+			onFinished();
+		}
+
+		private void onFinished()
+		{
+			currentDownloadTask = null;
+			if (newDownloadRequestPending)
+			{
+				newDownloadRequestPending = false;
+				downloadCars();
+			}
 		}
 	}
 

@@ -4,7 +4,6 @@
 
     <string name="vehicles">Járművek</string>
     <string name="greengo">GreenGo</string>
-    <string name="mollimo_up">MOL Limo Up</string>
-    <string name="mollimo_eup">MOL Limo eUp</string>
+    <string name="mollimo">MOL Limo</string>
     <string name="blinkee">Blinkee</string>
 </resources>

@@ -117,4 +117,10 @@ public class MolLimo implements CarsharingService
 	{
 		return "com.vulog.carshare.mol";
 	}
+
+	@Override
+	public int getMenuID()
+	{
+		return R.id.mollimo_switch;
+	}
 }

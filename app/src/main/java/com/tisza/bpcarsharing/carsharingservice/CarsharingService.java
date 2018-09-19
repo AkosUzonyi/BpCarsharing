@@ -14,4 +14,5 @@ public interface CarsharingService
 	public Collection<Vehicle> downloadVehicles();
 	public List<List<LatLng>> downloadZone();
 	public String getAppPackage();
+	public int getMenuID();
 }

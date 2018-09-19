@@ -67,4 +67,10 @@ public class GreenGo implements CarsharingService
 	{
 		return "com.GreenGo";
 	}
+
+	@Override
+	public int getMenuID()
+	{
+		return R.id.greengo_switch;
+	}
 }

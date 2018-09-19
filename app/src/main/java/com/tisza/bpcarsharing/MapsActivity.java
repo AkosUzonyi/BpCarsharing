@@ -16,6 +16,8 @@ import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 import com.tisza.bpcarsharing.carsharingservice.*;
 
+import java.util.*;
+
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
 	private static final int DOWNLOAD_INTERVAL = 10;
@@ -24,11 +26,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	private static final int BP_ZOOM = 12, MY_LOCATION_ZOOM = 15;
 
 	private FusedLocationProviderClient fusedLocationClient;
-
-	private VehicleDownloader vehicleDownloader;
 	private DrawerLayout drawerLayout;
 	private GoogleMap map;
-	private VehicleMarkerManager vehicleMarkerManager;
+	private Collection<VehicleMarkerManager> vehicleMarkerManagers = new ArrayList<>();
+	private Collection<VehicleDownloader> activeVehicleDownloaders = new ArrayList<>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -61,14 +62,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
-		vehicleMarkerManager = new VehicleMarkerManager();
-		vehicleDownloader = new VehicleDownloader(getMainLooper(), DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles);
-
 		NavigationView navigationView = findViewById(R.id.nav_view);
-		for (VehicleCategory vehicleCategory : VehicleCategory.values())
+		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
 		{
-			Switch vehicleCategorySwitch = ((Switch)navigationView.getMenu().findItem(vehicleCategory.getSwitchID()).getActionView());
-			vehicleCategorySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> vehicleDownloader.setVehicleCategoryActive(vehicleCategory, isChecked));
+			VehicleMarkerManager vehicleMarkerManager = new VehicleMarkerManager();
+			vehicleMarkerManagers.add(vehicleMarkerManager);
+			VehicleDownloader vehicleDownloader = new VehicleDownloader(getMainLooper(), carsharingService, DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles);
+			Switch carsharingSwitch = ((Switch)navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView());
+			carsharingSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+			{
+				if (isChecked)
+					vehicleDownloader.start();
+				else
+					vehicleDownloader.stop();
+			});
+			carsharingSwitch.setChecked(true);
 		}
 	}
 
@@ -101,7 +109,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
 			new ZoneDownloader(map, carsharingService).execute();
 
-		vehicleMarkerManager.setMap(googleMap);
+		for (VehicleMarkerManager vehicleMarkerManager : vehicleMarkerManagers)
+			vehicleMarkerManager.setMap(googleMap);
 	}
 
 	private void tryEnableMapLocation()
@@ -114,14 +123,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	protected void onStart()
 	{
 		super.onStart();
-		vehicleDownloader.start();
+		for (VehicleDownloader vehicleDownloader : activeVehicleDownloaders)
+			vehicleDownloader.start();
 	}
 
 	@Override
 	protected void onStop()
 	{
 		super.onStop();
-		vehicleDownloader.stop();
+		for (VehicleDownloader vehicleDownloader : activeVehicleDownloaders)
+			vehicleDownloader.stop();
 	}
 
 	@Override

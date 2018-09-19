@@ -13,13 +13,8 @@
                 app:actionLayout="@layout/carsharing_service_switch"
             />
             <item
-                android:id="@+id/mollimo_up_switch"
-                android:title="@string/mollimo_up"
-                app:actionLayout="@layout/carsharing_service_switch"
-            />
-            <item
-                android:id="@+id/mollimo_eup_switch"
-                android:title="@string/mollimo_eup"
+                android:id="@+id/mollimo_switch"
+                android:title="@string/mollimo"
                 app:actionLayout="@layout/carsharing_service_switch"
             />
             <item

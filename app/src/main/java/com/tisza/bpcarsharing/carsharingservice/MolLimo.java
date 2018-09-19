@@ -7,9 +7,12 @@ import org.json.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
 
 public class MolLimo implements CarsharingService
 {
+	private static final Pattern shapePattern = Pattern.compile("(\\[.*?\\])");
+
 	private static VehicleCategory getVehicleCategoryFromModelName(String model)
 	{
 		switch (model)
@@ -89,12 +92,12 @@ public class MolLimo implements CarsharingService
 		try
 		{
 			String text = Utils.downloadText("https://www.mollimo.hu/data/homezone.js?Isg7gJs12R");
+			Matcher matcher = shapePattern.matcher(text);
 
-			for (String jsonArrayText : text.split(";"))
+			while (matcher.find())
 			{
 				List<LatLng> shape = new ArrayList<>();
-
-				JSONArray shapeJSONArray = new JSONArray(jsonArrayText.substring(jsonArrayText.indexOf("[")));
+				JSONArray shapeJSONArray = new JSONArray(matcher.group(1));
 				for (int i = 0; i < shapeJSONArray.length(); i++)
 				{
 					JSONObject coordsJSON = shapeJSONArray.getJSONObject(i);

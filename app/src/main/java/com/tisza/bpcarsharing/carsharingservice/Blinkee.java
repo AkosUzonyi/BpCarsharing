@@ -17,6 +17,12 @@ public class Blinkee implements CarsharingService
 	}
 
 	@Override
+	public Collection<? extends VehicleCategory> getVehicleCategories()
+	{
+		return Arrays.asList(VehicleCategory.BLINKEE);
+	}
+
+	@Override
 	public Collection<Vehicle> downloadVehicles()
 	{
 		Collection<Vehicle> vehicles = new ArrayList<>();

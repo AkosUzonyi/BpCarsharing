@@ -17,6 +17,12 @@ public class GreenGo implements CarsharingService
 	}
 
 	@Override
+	public Collection<? extends VehicleCategory> getVehicleCategories()
+	{
+		return Arrays.asList(VehicleCategory.GREENGO);
+	}
+
+	@Override
 	public Collection<Vehicle> downloadVehicles()
 	{
 		Collection<Vehicle> vehicles = new ArrayList<>();

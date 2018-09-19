@@ -12,6 +12,7 @@ public class VehicleDownloader
 	private final VehiclesDownloadedListener vehiclesDownloadedListener;
 	private int downloadInterval;
 	private List<VehicleDownloadAsyncTask> runningDownloadTasks = new ArrayList<>();
+	private Set<VehicleCategory> activeVehicleCategories = new HashSet<>(Arrays.asList(VehicleCategory.values()));
 	private List<Vehicle> downloadedVehicles = new ArrayList<>();
 
 	public VehicleDownloader(Looper looper, int downloadInterval, VehiclesDownloadedListener vehiclesDownloadedListener)
@@ -19,6 +20,14 @@ public class VehicleDownloader
 		handler = new Handler(looper);
 		this.downloadInterval = downloadInterval;
 		this.vehiclesDownloadedListener = vehiclesDownloadedListener;
+	}
+
+	public void setVehicleCategoryActive(VehicleCategory vehicleCategory, boolean active)
+	{
+		if (active)
+			activeVehicleCategories.add(vehicleCategory);
+		else
+			activeVehicleCategories.remove(vehicleCategory);
 	}
 
 	public void setDownloadInterval(int downloadInterval)
@@ -49,10 +58,26 @@ public class VehicleDownloader
 		{
 			downloadedVehicles.clear();
 			for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
-				new VehicleDownloadAsyncTask(carsharingService).execute();
+			{
+				if (hasAnyVehicleCategory(carsharingService.getVehicleCategories()))
+					new VehicleDownloadAsyncTask(carsharingService).execute();
+			}
+
+			if (runningDownloadTasks.isEmpty())
+				vehiclesDownloadedListener.onVehiclesDowloaded(Collections.EMPTY_LIST);
 		}
 
 		handler.postDelayed(downloadCarsRunnable, downloadInterval * 1000);
+	}
+
+	private boolean hasAnyVehicleCategory(Collection<? extends VehicleCategory> vehicleCategories)
+	{
+		for (VehicleCategory vehicleCategory : vehicleCategories)
+		{
+			if (activeVehicleCategories.contains(vehicleCategory))
+				return true;
+		}
+		return false;
 	}
 
 	private void cancelDownloadTasks()
@@ -86,7 +111,8 @@ public class VehicleDownloader
 		protected void onPostExecute(Collection<Vehicle> result)
 		{
 			for (Vehicle vehicle : result)
-				downloadedVehicles.add(vehicle);
+				if (activeVehicleCategories.contains(vehicle.getCategory()))
+					downloadedVehicles.add(vehicle);
 
 			runningDownloadTasks.remove(this);
 

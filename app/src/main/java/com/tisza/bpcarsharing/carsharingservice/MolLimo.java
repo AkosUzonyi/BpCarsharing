@@ -27,6 +27,12 @@ public class MolLimo implements CarsharingService
 	}
 
 	@Override
+	public Collection<? extends VehicleCategory> getVehicleCategories()
+	{
+		return Arrays.asList(VehicleCategory.MOL_LIMO_UP, VehicleCategory.MOL_LIMO_EUP);
+	}
+
+	@Override
 	public Collection<Vehicle> downloadVehicles()
 	{
 		Collection<Vehicle> vehicles = new ArrayList<>();

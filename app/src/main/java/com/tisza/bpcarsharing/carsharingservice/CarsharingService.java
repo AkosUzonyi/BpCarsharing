@@ -9,6 +9,7 @@ public interface CarsharingService
 	public static final CarsharingService[] CARSHARING_SERVICES = new CarsharingService[]{new GreenGo(), new MolLimo(), new Blinkee()};
 
 	public int getColor();
+	public Collection<? extends VehicleCategory> getVehicleCategories();
 	public Collection<Vehicle> downloadVehicles();
 	public String getAppPackage();
 }

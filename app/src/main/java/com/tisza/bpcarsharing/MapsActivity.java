@@ -4,6 +4,7 @@ import android.*;
 import android.content.*;
 import android.content.pm.*;
 import android.os.*;
+import android.support.design.widget.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.support.v4.widget.*;
@@ -16,7 +17,6 @@ import com.google.android.gms.maps.model.*;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
-
 	private static final int DOWNLOAD_INTERVAL = 10;
 	private static final LatLng BP_CENTER = new LatLng(47.495225, 19.045508);
 	private static final LatLngBounds BP_BOUNDS = new LatLngBounds(new LatLng(47.463008, 18.983644), new LatLng(47.550324, 19.157741));
@@ -62,6 +62,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 		vehicleMarkerManager = new VehicleMarkerManager();
 		vehicleDownloader = new VehicleDownloader(getMainLooper(), DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles);
+
+		NavigationView navigationView = findViewById(R.id.nav_view);
+		for (VehicleCategory vehicleCategory : VehicleCategory.values())
+		{
+			Switch vehicleCategorySwitch = ((Switch)navigationView.getMenu().findItem(vehicleCategory.getSwitchID()).getActionView());
+			vehicleCategorySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> vehicleDownloader.setVehicleCategoryActive(vehicleCategory, isChecked));
+		}
 	}
 
 	@Override

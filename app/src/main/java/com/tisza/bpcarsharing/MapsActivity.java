@@ -111,7 +111,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		tryEnableMapLocation();
 
 		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
-			new ZoneDownloader(map, carsharingService).execute();
+			new ZoneDownloader(carsharingService).execute();
 
 		for (VehicleMarkerManager vehicleMarkerManager : vehicleMarkerManagers)
 			vehicleMarkerManager.setMap(googleMap);
@@ -164,4 +164,38 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			startActivity(launchIntent);
 		}
 	}
+
+	private class ZoneDownloader extends AsyncTask<Void, Void, List<List<LatLng>>>
+	{
+		private final CarsharingService carsharingService;
+
+		public ZoneDownloader(CarsharingService carsharingService)
+		{
+			this.carsharingService = carsharingService;
+		}
+
+		@Override
+		protected List<List<LatLng>> doInBackground(Void... voids)
+		{
+			return carsharingService.downloadZone();
+		}
+
+		@Override
+		protected void onPostExecute(List<List<LatLng>> zone)
+		{
+			for (List<LatLng> shape : zone)
+			{
+				int color = carsharingService.getColor();
+
+				PolygonOptions polygonOptions = new PolygonOptions()
+						.addAll(shape)
+						.fillColor(Color.argb(100, Color.red(color), Color.green(color), Color.blue(color)))
+						.strokeColor(Color.BLACK)
+						.strokeWidth(2)
+						;
+				Polygon polygon = map.addPolygon(polygonOptions);
+			}
+		}
+	}
+
 }

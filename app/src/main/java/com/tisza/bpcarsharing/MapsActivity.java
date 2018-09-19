@@ -20,6 +20,9 @@ import java.util.*;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
+	private static final String SP_NAME_SWITCH = "switch";
+	private static final String SP_KEY_CAR = "car";
+
 	private static final int DOWNLOAD_INTERVAL = 10;
 	private static final LatLng BP_CENTER = new LatLng(47.495225, 19.045508);
 	private static final LatLngBounds BP_BOUNDS = new LatLngBounds(new LatLng(47.463008, 18.983644), new LatLng(47.550324, 19.157741));
@@ -62,6 +65,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
+		SharedPreferences sharedPreferences = getSharedPreferences(SP_NAME_SWITCH, Context.MODE_PRIVATE);
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
 		{
@@ -76,7 +80,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 				else
 					vehicleDownloader.stop();
 			});
-			carsharingSwitch.setChecked(true);
+			carsharingSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_CAR + carsharingService.getID(), true));
 		}
 	}
 
@@ -133,6 +137,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		super.onStop();
 		for (VehicleDownloader vehicleDownloader : activeVehicleDownloaders)
 			vehicleDownloader.stop();
+
+		SharedPreferences sharedPreferences = getSharedPreferences(SP_NAME_SWITCH, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		NavigationView navigationView = findViewById(R.id.nav_view);
+		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
+		{
+			Switch carsharingSwitch = ((Switch)navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView());
+			editor.putBoolean(SP_KEY_CAR + carsharingService.getID(), carsharingSwitch.isChecked());
+		}
+		editor.apply();
 	}
 
 	@Override

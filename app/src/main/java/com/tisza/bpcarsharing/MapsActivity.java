@@ -26,7 +26,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 	private VehicleDownloader vehicleDownloader;
 	private DrawerLayout drawerLayout;
-	private GoogleMap mMap;
+	private GoogleMap map;
 	private VehicleMarkerManager vehicleMarkerManager;
 
 	@Override
@@ -51,7 +51,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 					{
 						LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 						if (BP_BOUNDS.contains(latLng))
-							mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MY_LOCATION_ZOOM));
+							map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MY_LOCATION_ZOOM));
 					}
 				});
 
@@ -92,9 +92,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
-		mMap = googleMap;
-		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BP_CENTER, BP_ZOOM));
-		mMap.setOnInfoWindowClickListener(this);
+		map = googleMap;
+		map.moveCamera(CameraUpdateFactory.newLatLngZoom(BP_CENTER, BP_ZOOM));
+		map.setOnInfoWindowClickListener(this);
 		tryEnableMapLocation();
 
 		vehicleMarkerManager.setMap(googleMap);
@@ -102,8 +102,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 	private void tryEnableMapLocation()
 	{
-		if (mMap != null && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-			mMap.setMyLocationEnabled(true);
+		if (map != null && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+			map.setMyLocationEnabled(true);
 	}
 
 	@Override

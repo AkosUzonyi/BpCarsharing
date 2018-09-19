@@ -88,7 +88,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			carSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_CAR + carsharingService.getID(), true));
 
 			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
-			zoneSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_ZONE + carsharingService.getID(), true));
+			zoneSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_ZONE + carsharingService.getID(), false));
 		}
 	}
 
@@ -151,8 +151,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
 		{
-			Switch carsharingSwitch = ((Switch)navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView());
-			editor.putBoolean(SP_KEY_CAR + carsharingService.getID(), carsharingSwitch.isChecked());
+			Switch carSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.car_switch);
+			editor.putBoolean(SP_KEY_CAR + carsharingService.getID(), carSwitch.isChecked());
+			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
+			editor.putBoolean(SP_KEY_ZONE + carsharingService.getID(), zoneSwitch.isChecked());
 		}
 		editor.apply();
 	}
@@ -193,6 +195,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		{
 			List<Polygon> polygons = new ArrayList<>();
 
+			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
+			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+			{
+				for (Polygon polygon : polygons)
+				{
+					polygon.setVisible(isChecked);
+				}
+			});
+
 			for (List<LatLng> shape : zone)
 			{
 				int color = carsharingService.getColor();
@@ -202,20 +213,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 						.fillColor(Color.argb(50, Color.red(color), Color.green(color), Color.blue(color)))
 						.strokeColor(Color.BLACK)
 						.strokeWidth(2)
+						.visible(zoneSwitch.isChecked())
 						;
 				Polygon polygon = map.addPolygon(polygonOptions);
 				polygons.add(polygon);
 			}
 
-			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
-			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
-			{
-				for (Polygon polygon : polygons)
-				{
-					polygon.setVisible(isChecked);
-				}
-			});
-			zoneSwitch.setChecked(zoneSwitch.isChecked()); //trigger listener
 		}
 	}
 

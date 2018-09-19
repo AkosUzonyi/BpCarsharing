@@ -11,6 +11,12 @@ import java.util.*;
 public class GreenGo implements CarsharingService
 {
 	@Override
+	public String getID()
+	{
+		return "greengo";
+	}
+
+	@Override
 	public int getColor()
 	{
 		return Color.GREEN;
@@ -42,7 +48,7 @@ public class GreenGo implements CarsharingService
 				String plate_number = vehicleJSON.getString("plate_number");
 				int estimated_km = vehicleJSON.getInt("estimated_km");
 
-				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, estimated_km, VehicleCategory.GREENGO));
+				vehicles.add(new Vehicle(getID() + id, this, gps_lat, gps_long, plate_number, estimated_km, VehicleCategory.GREENGO));
 			}
 		}
 		catch (JSONException e)

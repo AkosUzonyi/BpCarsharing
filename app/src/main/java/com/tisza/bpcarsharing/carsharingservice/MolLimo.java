@@ -21,6 +21,12 @@ public class MolLimo implements CarsharingService
 	}
 
 	@Override
+	public String getID()
+	{
+		return "mollimo";
+	}
+
+	@Override
 	public int getColor()
 	{
 		return Color.BLUE;
@@ -60,7 +66,7 @@ public class MolLimo implements CarsharingService
 				String plate_number = descriptionJSON.getString("name");
 				int estimated_km = statusJSON.getInt("energyLevel");
 
-				vehicles.add(new Vehicle(id, this, gps_lat, gps_long, plate_number, estimated_km, vehicleCategory));
+				vehicles.add(new Vehicle(getID() + id, this, gps_lat, gps_long, plate_number, estimated_km, vehicleCategory));
 			}
 		}
 		catch (JSONException e)

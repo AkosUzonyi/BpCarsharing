@@ -3,6 +3,7 @@ package com.tisza.bpcarsharing;
 import android.*;
 import android.content.*;
 import android.content.pm.*;
+import android.graphics.*;
 import android.os.*;
 import android.support.design.widget.*;
 import android.support.v4.app.*;
@@ -22,6 +23,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 {
 	private static final String SP_NAME_SWITCH = "switch";
 	private static final String SP_KEY_CAR = "car";
+	private static final String SP_KEY_ZONE = "zone";
 
 	private static final int DOWNLOAD_INTERVAL = 10;
 	private static final LatLng BP_CENTER = new LatLng(47.495225, 19.045508);
@@ -30,7 +32,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 	private FusedLocationProviderClient fusedLocationClient;
 	private DrawerLayout drawerLayout;
+	private NavigationView navigationView;
 	private GoogleMap map;
+
 	private Collection<VehicleMarkerManager> vehicleMarkerManagers = new ArrayList<>();
 	private Collection<VehicleDownloader> activeVehicleDownloaders = new ArrayList<>();
 
@@ -41,6 +45,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		setContentView(R.layout.activity_maps);
 
 		drawerLayout = findViewById(R.id.drawer_layout);
+		navigationView = findViewById(R.id.nav_view);
 
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
@@ -66,21 +71,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
 		SharedPreferences sharedPreferences = getSharedPreferences(SP_NAME_SWITCH, Context.MODE_PRIVATE);
-		NavigationView navigationView = findViewById(R.id.nav_view);
 		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
 		{
 			VehicleMarkerManager vehicleMarkerManager = new VehicleMarkerManager();
 			vehicleMarkerManagers.add(vehicleMarkerManager);
 			VehicleDownloader vehicleDownloader = new VehicleDownloader(getMainLooper(), carsharingService, DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles);
-			Switch carsharingSwitch = ((Switch)navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView());
-			carsharingSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+
+			Switch carSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.car_switch);
+			carSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
 			{
 				if (isChecked)
 					vehicleDownloader.start();
 				else
 					vehicleDownloader.stop();
 			});
-			carsharingSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_CAR + carsharingService.getID(), true));
+			carSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_CAR + carsharingService.getID(), true));
+
+			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
+			zoneSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_ZONE + carsharingService.getID(), true));
 		}
 	}
 
@@ -183,6 +191,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		@Override
 		protected void onPostExecute(List<List<LatLng>> zone)
 		{
+			List<Polygon> polygons = new ArrayList<>();
+
 			for (List<LatLng> shape : zone)
 			{
 				int color = carsharingService.getColor();
@@ -194,7 +204,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 						.strokeWidth(2)
 						;
 				Polygon polygon = map.addPolygon(polygonOptions);
+				polygons.add(polygon);
 			}
+
+			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
+			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+			{
+				for (Polygon polygon : polygons)
+				{
+					polygon.setVisible(isChecked);
+				}
+			});
+			zoneSwitch.setChecked(zoneSwitch.isChecked()); //trigger listener
 		}
 	}
 

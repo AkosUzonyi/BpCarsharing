@@ -199,7 +199,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 				PolygonOptions polygonOptions = new PolygonOptions()
 						.addAll(shape)
-						.fillColor(Color.argb(100, Color.red(color), Color.green(color), Color.blue(color)))
+						.fillColor(Color.argb(50, Color.red(color), Color.green(color), Color.blue(color)))
 						.strokeColor(Color.BLACK)
 						.strokeWidth(2)
 						;

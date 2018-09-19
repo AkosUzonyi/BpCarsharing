@@ -1,15 +1,19 @@
 package com.tisza.bpcarsharing.carsharingservice;
 
 import android.graphics.*;
+import android.util.*;
 import com.google.android.gms.maps.model.*;
 import com.tisza.bpcarsharing.*;
 import org.json.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
 
 public class GreenGo implements CarsharingService
 {
+	private static final Pattern zonePattern = Pattern.compile("var area = (\\[[^;]*)");
+
 	@Override
 	public String getID()
 	{
@@ -65,7 +69,45 @@ public class GreenGo implements CarsharingService
 
 	public List<List<LatLng>> downloadZone()
 	{
-		return Collections.EMPTY_LIST;
+		List<List<LatLng>> zone = new ArrayList<>();
+
+		try
+		{
+			String pageHTML = Utils.downloadText("https://www.greengo.hu");
+
+			Matcher matcher = zonePattern.matcher(pageHTML);
+			if (!matcher.find())
+				return zone;
+
+			String jsonText = matcher.group(1);
+			JSONArray jsonArray = new JSONArray(jsonText);
+
+			for (int i = 0; i < jsonArray.length(); i++)
+			{
+				JSONArray shapeJSONArray = new JSONArray(jsonArray.getJSONObject(i).getString("area"));
+				List<LatLng> shape = new ArrayList<>();
+
+				for (int j = 0; j < shapeJSONArray.length(); j++)
+				{
+					JSONArray coordsJSON = shapeJSONArray.getJSONArray(j);
+					double lat = coordsJSON.getDouble(1);
+					double lng = coordsJSON.getDouble(0);
+					shape.add(new LatLng(lat, lng));
+				}
+
+				zone.add(shape);
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return zone;
 	}
 
 	@Override

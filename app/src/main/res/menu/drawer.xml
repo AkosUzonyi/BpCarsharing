@@ -8,6 +8,10 @@
         >
         <menu>
             <item
+                android:title=""
+                app:actionLayout="@layout/carsharing_service_switch_header"
+            />
+            <item
                 android:id="@+id/greengo_switch"
                 android:title="@string/greengo"
                 app:actionLayout="@layout/carsharing_service_switch"

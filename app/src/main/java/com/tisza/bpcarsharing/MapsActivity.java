@@ -14,6 +14,7 @@ import android.widget.*;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+import com.tisza.bpcarsharing.carsharingservice.*;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
@@ -96,6 +97,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		map.moveCamera(CameraUpdateFactory.newLatLngZoom(BP_CENTER, BP_ZOOM));
 		map.setOnInfoWindowClickListener(this);
 		tryEnableMapLocation();
+
+		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
+			new ZoneDownloader(map, carsharingService).execute();
 
 		vehicleMarkerManager.setMap(googleMap);
 	}

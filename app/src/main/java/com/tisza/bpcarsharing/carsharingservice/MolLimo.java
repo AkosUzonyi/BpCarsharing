@@ -76,6 +76,43 @@ public class MolLimo implements CarsharingService
 	}
 
 	@Override
+	public List<List<LatLng>> downloadZone()
+	{
+		List<List<LatLng>> zone = new ArrayList<>();
+
+		try
+		{
+			String text = Utils.downloadText("https://www.mollimo.hu/data/homezone.js?Isg7gJs12R");
+
+			for (String jsonArrayText : text.split(";"))
+			{
+				List<LatLng> shape = new ArrayList<>();
+
+				JSONArray shapeJSONArray = new JSONArray(jsonArrayText.substring(jsonArrayText.indexOf("[")));
+				for (int i = 0; i < shapeJSONArray.length(); i++)
+				{
+					JSONObject coordsJSON = shapeJSONArray.getJSONObject(i);
+					double lat = coordsJSON.getDouble("lat");
+					double lng = coordsJSON.getDouble("lng");
+					shape.add(new LatLng(lat, lng));
+				}
+
+				zone.add(shape);
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return zone;
+	}
+
+	@Override
 	public String getAppPackage()
 	{
 		return "com.vulog.carshare.mol";

@@ -57,6 +57,11 @@ public class GreenGo implements CarsharingService
 		return vehicles;
 	}
 
+	public List<List<LatLng>> downloadZone()
+	{
+		return Collections.EMPTY_LIST;
+	}
+
 	@Override
 	public String getAppPackage()
 	{

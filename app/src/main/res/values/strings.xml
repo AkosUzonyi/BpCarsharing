@@ -5,4 +5,6 @@
     <string name="greengo">GreenGo</string>
     <string name="mollimo">MOL Limo</string>
     <string name="blinkee">Blinkee</string>
+
+    <string name="app_not_installed">Az alkalmazás nincs telepítve</string>
 </resources>

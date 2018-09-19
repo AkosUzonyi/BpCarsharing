@@ -167,7 +167,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		Intent launchIntent = getPackageManager().getLaunchIntentForPackage(vehicle.getCarsharingService().getAppPackage());
 		if (launchIntent == null)
 		{
-			Toast.makeText(this, "App not installed", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.app_not_installed, Toast.LENGTH_LONG).show();
 		}
 		else
 		{

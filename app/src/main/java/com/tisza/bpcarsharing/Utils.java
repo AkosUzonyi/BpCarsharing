@@ -14,7 +14,6 @@ public class Utils
 		URL url = new URL(urlString);
 		HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
 		urlConnection.setRequestMethod("GET");
-		urlConnection.setReadTimeout(5000);
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 		StringBuffer response = new StringBuffer();

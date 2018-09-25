@@ -19,6 +19,7 @@ public class MolLimo implements CarsharingService
 		{
 			case "Up": return VehicleCategory.MOL_LIMO_UP;
 			case "eUp": return VehicleCategory.MOL_LIMO_EUP;
+			case "Mercedes": return VehicleCategory.MOL_LIMO_MERCEDES;
 		}
 		return null;
 	}

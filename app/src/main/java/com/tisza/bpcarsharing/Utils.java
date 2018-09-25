@@ -13,6 +13,8 @@ public class Utils
 	{
 		URL url = new URL(urlString);
 		HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
+		urlConnection.setRequestProperty("Referer", url.getProtocol() + "://" + url.getAuthority() + "/");
+		urlConnection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
 		urlConnection.setRequestMethod("GET");
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));

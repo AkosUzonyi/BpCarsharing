@@ -2,7 +2,9 @@ package com.tisza.bpcarsharing.carsharingservice;
 
 import com.google.android.gms.maps.model.*;
 import com.tisza.bpcarsharing.*;
+import org.json.*;
 
+import java.io.*;
 import java.util.*;
 
 public interface CarsharingService
@@ -12,7 +14,7 @@ public interface CarsharingService
 	public String getID();
 	public int getColor();
 	public Collection<? extends VehicleCategory> getVehicleCategories();
-	public Collection<Vehicle> downloadVehicles();
+	public Collection<Vehicle> downloadVehicles() throws IOException, JSONException;
 	public List<List<LatLng>> downloadZone();
 	public String getAppPackage();
 	public int getMenuID();

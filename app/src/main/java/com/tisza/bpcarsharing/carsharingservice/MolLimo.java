@@ -43,43 +43,32 @@ public class MolLimo implements CarsharingService
 	}
 
 	@Override
-	public Collection<Vehicle> downloadVehicles()
+	public Collection<Vehicle> downloadVehicles() throws IOException, JSONException
 	{
 		Collection<Vehicle> vehicles = new ArrayList<>();
 
-		try
+		String jsonText = Utils.downloadText("https://www.mollimo.hu/data/cars.js?R3gE8PLjKk");
+		JSONArray jsonArray = new JSONArray(jsonText.substring(jsonText.indexOf("[")));
+
+		for (int i = 0; i < jsonArray.length(); i++)
 		{
-			String jsonText = Utils.downloadText("https://www.mollimo.hu/data/cars.js?R3gE8PLjKk");
-			JSONArray jsonArray = new JSONArray(jsonText.substring(jsonText.indexOf("[")));
+			JSONObject vehicleJSON = jsonArray.getJSONObject(i);
 
-			for (int i = 0; i < jsonArray.length(); i++)
-			{
-				JSONObject vehicleJSON = jsonArray.getJSONObject(i);
+			JSONObject positionJSON = vehicleJSON.getJSONObject("location").getJSONObject("position");
+			JSONObject descriptionJSON = vehicleJSON.getJSONObject("description");
+			JSONObject statusJSON = vehicleJSON.getJSONObject("status");
 
-				JSONObject positionJSON = vehicleJSON.getJSONObject("location").getJSONObject("position");
-				JSONObject descriptionJSON = vehicleJSON.getJSONObject("description");
-				JSONObject statusJSON = vehicleJSON.getJSONObject("status");
+			VehicleCategory vehicleCategory = getVehicleCategoryFromModelName(descriptionJSON.getString("model"));
+			if (vehicleCategory == null)
+				continue;
 
-				VehicleCategory vehicleCategory = getVehicleCategoryFromModelName(descriptionJSON.getString("model"));
-				if (vehicleCategory == null)
-					continue;
+			String id = descriptionJSON.getString("id");
+			double gps_lat = positionJSON.getDouble("lat");
+			double gps_long = positionJSON.getDouble("lon");
+			String plate_number = descriptionJSON.getString("name");
+			int estimated_km = statusJSON.getInt("energyLevel");
 
-				String id = descriptionJSON.getString("id");
-				double gps_lat = positionJSON.getDouble("lat");
-				double gps_long = positionJSON.getDouble("lon");
-				String plate_number = descriptionJSON.getString("name");
-				int estimated_km = statusJSON.getInt("energyLevel");
-
-				vehicles.add(new Vehicle(getID() + id, this, gps_lat, gps_long, plate_number, estimated_km, vehicleCategory));
-			}
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+			vehicles.add(new Vehicle(getID() + id, this, gps_lat, gps_long, plate_number, estimated_km, vehicleCategory));
 		}
 
 		return vehicles;

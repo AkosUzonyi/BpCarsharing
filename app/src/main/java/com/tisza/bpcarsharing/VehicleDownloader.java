@@ -2,7 +2,9 @@ package com.tisza.bpcarsharing;
 
 import android.os.*;
 import com.tisza.bpcarsharing.carsharingservice.*;
+import org.json.*;
 
+import java.io.*;
 import java.util.*;
 
 public class VehicleDownloader
@@ -80,7 +82,15 @@ public class VehicleDownloader
 		@Override
 		protected Collection<Vehicle> doInBackground(Void... voids)
 		{
-			return carsharingService.downloadVehicles();
+			try
+			{
+				return carsharingService.downloadVehicles();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				return Collections.EMPTY_LIST;
+			}
 		}
 
 		@Override

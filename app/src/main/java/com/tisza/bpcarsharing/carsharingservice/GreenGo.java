@@ -33,35 +33,24 @@ public class GreenGo implements CarsharingService
 	}
 
 	@Override
-	public Collection<Vehicle> downloadVehicles()
+	public Collection<Vehicle> downloadVehicles() throws IOException, JSONException
 	{
 		Collection<Vehicle> vehicles = new ArrayList<>();
 
-		try
-		{
-			String jsonText = Utils.downloadText("https://www.greengo.hu/divcontent.php?rnd=0.3300484530422363&funct=callAPI&APIname=getVehicleList&params[P_ICON_SIZE]=48&_=1528898349590");
-			JSONArray jsonArray = new JSONArray(jsonText);
+		String jsonText = Utils.downloadText("https://www.greengo.hu/divcontent.php?rnd=0.3300484530422363&funct=callAPI&APIname=getVehicleList&params[P_ICON_SIZE]=48&_=1528898349590");
+		JSONArray jsonArray = new JSONArray(jsonText);
 
-			for (int i = 0; i < jsonArray.length(); i++)
-			{
-				JSONObject vehicleJSON = jsonArray.getJSONObject(i);
-
-				String id = vehicleJSON.getString("vehicle_id");
-				double gps_lat = vehicleJSON.getDouble("gps_lat");
-				double gps_long = vehicleJSON.getDouble("gps_long");
-				String plate_number = vehicleJSON.getString("plate_number");
-				int estimated_km = vehicleJSON.getInt("estimated_km");
-
-				vehicles.add(new Vehicle(getID() + id, this, gps_lat, gps_long, plate_number, estimated_km, VehicleCategory.GREENGO));
-			}
-		}
-		catch (JSONException e)
+		for (int i = 0; i < jsonArray.length(); i++)
 		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+			JSONObject vehicleJSON = jsonArray.getJSONObject(i);
+
+			String id = vehicleJSON.getString("vehicle_id");
+			double gps_lat = vehicleJSON.getDouble("gps_lat");
+			double gps_long = vehicleJSON.getDouble("gps_long");
+			String plate_number = vehicleJSON.getString("plate_number");
+			int estimated_km = vehicleJSON.getInt("estimated_km");
+
+			vehicles.add(new Vehicle(getID() + id, this, gps_lat, gps_long, plate_number, estimated_km, VehicleCategory.GREENGO));
 		}
 
 		return vehicles;

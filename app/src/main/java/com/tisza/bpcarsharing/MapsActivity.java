@@ -1,6 +1,7 @@
 package com.tisza.bpcarsharing;
 
 import android.*;
+import android.app.*;
 import android.content.*;
 import android.content.pm.*;
 import android.graphics.*;
@@ -9,7 +10,6 @@ import android.support.design.widget.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.support.v4.widget.*;
-import android.support.v7.app.*;
 import android.view.*;
 import android.widget.*;
 import com.google.android.gms.location.*;
@@ -19,7 +19,7 @@ import com.tisza.bpcarsharing.carsharingservice.*;
 
 import java.util.*;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
+public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
 {
 	private static final String SP_NAME_SWITCH = "switch";
 	private static final String SP_KEY_CAR = "car";
@@ -65,8 +65,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 					}
 				});
 
-		setSupportActionBar(findViewById(R.id.toolbar));
-		ActionBar actionBar = getSupportActionBar();
+		setActionBar(findViewById(R.id.toolbar));
+		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
 

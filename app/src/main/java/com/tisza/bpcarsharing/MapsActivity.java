@@ -81,9 +81,15 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 			carSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
 			{
 				if (isChecked)
+				{
+					activeVehicleDownloaders.add(vehicleDownloader);
 					vehicleDownloader.start();
+				}
 				else
+				{
+					activeVehicleDownloaders.remove(vehicleDownloader);
 					vehicleDownloader.stop();
+				}
 			});
 			carSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_CAR + carsharingService.getID(), true));
 

@@ -2,9 +2,7 @@ package com.tisza.bpcarsharing;
 
 import android.os.*;
 import com.tisza.bpcarsharing.carsharingservice.*;
-import org.json.*;
 
-import java.io.*;
 import java.util.*;
 
 public class VehicleDownloader
@@ -52,13 +50,15 @@ public class VehicleDownloader
 			currentDownloadTask.cancel(true);
 
 		vehiclesDownloadedListener.onVehiclesDowloaded(Collections.EMPTY_LIST);
-		newDownloadRequestPending = false;
-		handler.removeCallbacks(downloadCarsRunnable);
 	}
 
 	private void downloadCars()
 	{
 		handler.removeCallbacks(downloadCarsRunnable);
+		newDownloadRequestPending = false;
+
+		if (!active)
+			return;
 
 		if (currentDownloadTask != null)
 		{
@@ -110,10 +110,7 @@ public class VehicleDownloader
 		{
 			currentDownloadTask = null;
 			if (newDownloadRequestPending)
-			{
-				newDownloadRequestPending = false;
 				downloadCars();
-			}
 		}
 	}
 

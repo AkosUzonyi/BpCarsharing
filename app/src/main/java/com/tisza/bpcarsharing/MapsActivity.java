@@ -4,7 +4,6 @@ import android.*;
 import android.app.*;
 import android.content.*;
 import android.content.pm.*;
-import android.graphics.*;
 import android.net.*;
 import android.os.*;
 import android.support.design.widget.*;
@@ -39,6 +38,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 
 	private Collection<VehicleMarkerManager> vehicleMarkerManagers = new ArrayList<>();
 	private Collection<VehicleDownloader> activeVehicleDownloaders = new ArrayList<>();
+	private Collection<ZoneDownloader> zoneDownloaders = new ArrayList<>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -96,7 +96,11 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 			});
 			carSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_CAR + carsharingService.getID(), true));
 
+			ZoneDownloader zoneDownloader = new ZoneDownloader(carsharingService);
+			zoneDownloaders.add(zoneDownloader);
+
 			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
+			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> zoneDownloader.setVisible(isChecked));
 			zoneSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_ZONE + carsharingService.getID(), false));
 		}
 	}
@@ -127,8 +131,8 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		map.setOnInfoWindowClickListener(this);
 		tryEnableMapLocation();
 
-		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
-			new ZoneDownloader(carsharingService).execute();
+		for (ZoneDownloader zoneDownloader : zoneDownloaders)
+			zoneDownloader.setMap(map);
 
 		for (VehicleMarkerManager vehicleMarkerManager : vehicleMarkerManagers)
 			vehicleMarkerManager.setMap(googleMap);
@@ -187,6 +191,11 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	public void networkConnectionStateChanged(boolean isConnected)
 	{
 		setDownloadingActive(isConnected);
+
+		if (isConnected)
+			for (ZoneDownloader zoneDownloader : zoneDownloaders)
+				if (!zoneDownloader.isReady())
+					zoneDownloader.download();
 	}
 
 	private void setDownloadingActive(boolean active)
@@ -198,52 +207,4 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 				vehicleDownloader.stop();
 
 	}
-
-	private class ZoneDownloader extends AsyncTask<Void, Void, List<List<LatLng>>>
-	{
-		private final CarsharingService carsharingService;
-
-		public ZoneDownloader(CarsharingService carsharingService)
-		{
-			this.carsharingService = carsharingService;
-		}
-
-		@Override
-		protected List<List<LatLng>> doInBackground(Void... voids)
-		{
-			return carsharingService.downloadZone();
-		}
-
-		@Override
-		protected void onPostExecute(List<List<LatLng>> zone)
-		{
-			List<Polygon> polygons = new ArrayList<>();
-
-			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
-			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
-			{
-				for (Polygon polygon : polygons)
-				{
-					polygon.setVisible(isChecked);
-				}
-			});
-
-			for (List<LatLng> shape : zone)
-			{
-				int color = carsharingService.getColor();
-
-				PolygonOptions polygonOptions = new PolygonOptions()
-						.addAll(shape)
-						.fillColor(Color.argb(50, Color.red(color), Color.green(color), Color.blue(color)))
-						.strokeColor(Color.BLACK)
-						.strokeWidth(2)
-						.visible(zoneSwitch.isChecked())
-						;
-				Polygon polygon = map.addPolygon(polygonOptions);
-				polygons.add(polygon);
-			}
-
-		}
-	}
-
 }

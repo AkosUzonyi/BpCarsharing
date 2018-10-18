@@ -56,44 +56,33 @@ public class GreenGo implements CarsharingService
 		return vehicles;
 	}
 
-	public List<List<LatLng>> downloadZone()
+	public List<List<LatLng>> downloadZone() throws IOException, JSONException
 	{
 		List<List<LatLng>> zone = new ArrayList<>();
 
-		try
+		String pageHTML = Utils.downloadText("https://www.greengo.hu");
+
+		Matcher matcher = zonePattern.matcher(pageHTML);
+		if (!matcher.find())
+			return zone;
+
+		String jsonText = matcher.group(1);
+		JSONArray jsonArray = new JSONArray(jsonText);
+
+		for (int i = 0; i < jsonArray.length(); i++)
 		{
-			String pageHTML = Utils.downloadText("https://www.greengo.hu");
+			JSONArray shapeJSONArray = new JSONArray(jsonArray.getJSONObject(i).getString("area"));
+			List<LatLng> shape = new ArrayList<>();
 
-			Matcher matcher = zonePattern.matcher(pageHTML);
-			if (!matcher.find())
-				return zone;
-
-			String jsonText = matcher.group(1);
-			JSONArray jsonArray = new JSONArray(jsonText);
-
-			for (int i = 0; i < jsonArray.length(); i++)
+			for (int j = 0; j < shapeJSONArray.length(); j++)
 			{
-				JSONArray shapeJSONArray = new JSONArray(jsonArray.getJSONObject(i).getString("area"));
-				List<LatLng> shape = new ArrayList<>();
-
-				for (int j = 0; j < shapeJSONArray.length(); j++)
-				{
-					JSONArray coordsJSON = shapeJSONArray.getJSONArray(j);
-					double lat = coordsJSON.getDouble(1);
-					double lng = coordsJSON.getDouble(0);
-					shape.add(new LatLng(lat, lng));
-				}
-
-				zone.add(shape);
+				JSONArray coordsJSON = shapeJSONArray.getJSONArray(j);
+				double lat = coordsJSON.getDouble(1);
+				double lng = coordsJSON.getDouble(0);
+				shape.add(new LatLng(lat, lng));
 			}
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+
+			zone.add(shape);
 		}
 
 		return zone;

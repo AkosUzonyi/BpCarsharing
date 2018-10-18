@@ -53,45 +53,34 @@ public class Blinkee implements CarsharingService
 		return vehicles;
 	}
 
-	public List<List<LatLng>> downloadZone()
+	public List<List<LatLng>> downloadZone() throws IOException, JSONException
 	{
 		List<List<LatLng>> zone = new ArrayList<>();
 
-		try
-		{
-			String text = Utils.downloadText("https://blinkee.city/api/regions");
-			JSONArray jsonArray = new JSONObject(text).getJSONObject("data").getJSONArray("items");
-			JSONObject bpRegionJSON = getJSONObjectFromArrayByID(jsonArray, 11);
-			JSONArray zoneJSONArray = bpRegionJSON
-					.getJSONArray("zones")
-					.getJSONObject(0)
-					.getJSONObject("area")
-					.getJSONArray("coordinates")
-					.getJSONArray(0);
+		String text = Utils.downloadText("https://blinkee.city/api/regions");
+		JSONArray jsonArray = new JSONObject(text).getJSONObject("data").getJSONArray("items");
+		JSONObject bpRegionJSON = getJSONObjectFromArrayByID(jsonArray, 11);
+		JSONArray zoneJSONArray = bpRegionJSON
+				.getJSONArray("zones")
+				.getJSONObject(0)
+				.getJSONObject("area")
+				.getJSONArray("coordinates")
+				.getJSONArray(0);
 
-			for (int i = 0; i < zoneJSONArray.length(); i++)
+		for (int i = 0; i < zoneJSONArray.length(); i++)
+		{
+			JSONArray shapeJSONArray = zoneJSONArray.getJSONArray(i);
+			List<LatLng> shape = new ArrayList<>();
+
+			for (int j = 0; j < shapeJSONArray.length(); j++)
 			{
-				JSONArray shapeJSONArray = zoneJSONArray.getJSONArray(i);
-				List<LatLng> shape = new ArrayList<>();
-
-				for (int j = 0; j < shapeJSONArray.length(); j++)
-				{
-					JSONArray coordsJSON = shapeJSONArray.getJSONArray(j);
-					double lat = coordsJSON.getDouble(1);
-					double lng = coordsJSON.getDouble(0);
-					shape.add(new LatLng(lat, lng));
-				}
-
-				zone.add(shape);
+				JSONArray coordsJSON = shapeJSONArray.getJSONArray(j);
+				double lat = coordsJSON.getDouble(1);
+				double lng = coordsJSON.getDouble(0);
+				shape.add(new LatLng(lat, lng));
 			}
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+
+			zone.add(shape);
 		}
 
 		return zone;

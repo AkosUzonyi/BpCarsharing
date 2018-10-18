@@ -5,6 +5,7 @@ import android.app.*;
 import android.content.*;
 import android.content.pm.*;
 import android.graphics.*;
+import android.net.*;
 import android.os.*;
 import android.support.design.widget.*;
 import android.support.v4.app.*;
@@ -19,7 +20,7 @@ import com.tisza.bpcarsharing.carsharingservice.*;
 
 import java.util.*;
 
-public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener
+public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, NetworkStateReceiver.NetworkStateListener
 {
 	private static final String SP_NAME_SWITCH = "switch";
 	private static final String SP_KEY_CAR = "car";
@@ -30,6 +31,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	private static final LatLngBounds BP_BOUNDS = new LatLngBounds(new LatLng(47.463008, 18.983644), new LatLng(47.550324, 19.157741));
 	private static final int BP_ZOOM = 12, MY_LOCATION_ZOOM = 15;
 
+	private NetworkStateReceiver networkStateReceiver;
 	private FusedLocationProviderClient fusedLocationClient;
 	private DrawerLayout drawerLayout;
 	private NavigationView navigationView;
@@ -44,6 +46,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_maps);
 
+		networkStateReceiver = new NetworkStateReceiver(this);
 		drawerLayout = findViewById(R.id.drawer_layout);
 		navigationView = findViewById(R.id.nav_view);
 
@@ -141,16 +144,15 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	protected void onStart()
 	{
 		super.onStart();
-		for (VehicleDownloader vehicleDownloader : activeVehicleDownloaders)
-			vehicleDownloader.start();
+		registerReceiver(networkStateReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 	}
 
 	@Override
 	protected void onStop()
 	{
 		super.onStop();
-		for (VehicleDownloader vehicleDownloader : activeVehicleDownloaders)
-			vehicleDownloader.stop();
+		unregisterReceiver(networkStateReceiver);
+		setDownloadingActive(false);
 
 		SharedPreferences sharedPreferences = getSharedPreferences(SP_NAME_SWITCH, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -179,6 +181,22 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		{
 			startActivity(launchIntent);
 		}
+	}
+
+	@Override
+	public void networkConnectionStateChanged(boolean isConnected)
+	{
+		setDownloadingActive(isConnected);
+	}
+
+	private void setDownloadingActive(boolean active)
+	{
+		for (VehicleDownloader vehicleDownloader : activeVehicleDownloaders)
+			if (active)
+				vehicleDownloader.start();
+			else
+				vehicleDownloader.stop();
+
 	}
 
 	private class ZoneDownloader extends AsyncTask<Void, Void, List<List<LatLng>>>

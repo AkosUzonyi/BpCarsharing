@@ -35,6 +35,8 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	private NavigationView navigationView;
 	private GoogleMap map;
 
+	private ProgressBarHandler progressBarHandler;
+
 	private Collection<VehicleMarkerManager> vehicleMarkerManagers = new ArrayList<>();
 	private Collection<VehicleDownloader> activeVehicleDownloaders = new ArrayList<>();
 	private Collection<ZoneDownloader> zoneDownloaders = new ArrayList<>();
@@ -48,6 +50,9 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		networkStateReceiver = new NetworkStateReceiver(this);
 		drawerLayout = findViewById(R.id.drawer_layout);
 		navigationView = findViewById(R.id.nav_view);
+
+		ProgressBar progressBar = findViewById(R.id.progress_bar);
+		progressBarHandler = new ProgressBarHandler(progressBar);
 
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
@@ -77,7 +82,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		{
 			VehicleMarkerManager vehicleMarkerManager = new VehicleMarkerManager();
 			vehicleMarkerManagers.add(vehicleMarkerManager);
-			VehicleDownloader vehicleDownloader = new VehicleDownloader(getMainLooper(), carsharingService, DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles);
+			VehicleDownloader vehicleDownloader = new VehicleDownloader(getMainLooper(), carsharingService, DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles, progressBarHandler);
 
 			Switch carSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.car_switch);
 			carSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -95,7 +100,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 			});
 			carSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_CAR + carsharingService.getID(), true));
 
-			ZoneDownloader zoneDownloader = new ZoneDownloader(carsharingService);
+			ZoneDownloader zoneDownloader = new ZoneDownloader(carsharingService, progressBarHandler);
 			zoneDownloaders.add(zoneDownloader);
 
 			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);

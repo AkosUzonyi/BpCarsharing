@@ -11,14 +11,17 @@ import java.util.*;
 public class ZoneDownloader
 {
 	private final CarsharingService carsharingService;
+	private final ProgressBarHandler progressBarHandler;
+
 	private boolean visible = false;
 	private GoogleMap map = null;
 	private List<List<LatLng>> coordinates = null;
 	private List<Polygon> polygons = new ArrayList<>();
 
-	public ZoneDownloader(CarsharingService carsharingService)
+	public ZoneDownloader(CarsharingService carsharingService, ProgressBarHandler progressBarHandler)
 	{
 		this.carsharingService = carsharingService;
+		this.progressBarHandler = progressBarHandler;
 	}
 
 	public void setMap(GoogleMap map)
@@ -73,6 +76,12 @@ public class ZoneDownloader
 	private class DownloadTask extends AsyncTask<Void, Void, List<List<LatLng>>>
 	{
 		@Override
+		protected void onPreExecute()
+		{
+			progressBarHandler.startProcess();
+		}
+
+		@Override
 		protected List<List<LatLng>> doInBackground(Void... voids)
 		{
 			try
@@ -89,8 +98,16 @@ public class ZoneDownloader
 		@Override
 		protected void onPostExecute(List<List<LatLng>> zone)
 		{
+			progressBarHandler.endProcess();
+
 			coordinates = zone;
 			createPolygons();
+		}
+
+		@Override
+		protected void onCancelled()
+		{
+			progressBarHandler.endProcess();
 		}
 	}
 }

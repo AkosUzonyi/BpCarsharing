@@ -11,18 +11,20 @@ public class VehicleDownloader
 	private final Handler handler;
 	private final CarsharingService carsharingService;
 	private final VehiclesDownloadedListener vehiclesDownloadedListener;
+	private final ProgressBarHandler progressBarHandler;
 
 	private boolean active = false;
 	private int downloadInterval;
 	private VehicleDownloadAsyncTask currentDownloadTask = null;
 	private boolean newDownloadRequestPending = false;
 
-	public VehicleDownloader(Looper looper, CarsharingService carsharingService, int downloadInterval, VehiclesDownloadedListener vehiclesDownloadedListener)
+	public VehicleDownloader(Looper looper, CarsharingService carsharingService, int downloadInterval, VehiclesDownloadedListener vehiclesDownloadedListener, ProgressBarHandler progressBarHandler)
 	{
 		handler = new Handler(looper);
 		this.carsharingService = carsharingService;
 		this.downloadInterval = downloadInterval;
 		this.vehiclesDownloadedListener = vehiclesDownloadedListener;
+		this.progressBarHandler = progressBarHandler;
 	}
 
 	public void setDownloadInterval(int downloadInterval)
@@ -77,6 +79,7 @@ public class VehicleDownloader
 		protected void onPreExecute()
 		{
 			currentDownloadTask = this;
+			progressBarHandler.startProcess();
 		}
 
 		@Override
@@ -109,6 +112,8 @@ public class VehicleDownloader
 		private void onFinished()
 		{
 			currentDownloadTask = null;
+			progressBarHandler.endProcess();
+
 			if (newDownloadRequestPending)
 				downloadCars();
 		}

@@ -31,7 +31,6 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	private static final int BP_ZOOM = 12, MY_LOCATION_ZOOM = 15;
 
 	private NetworkStateReceiver networkStateReceiver;
-	private FusedLocationProviderClient fusedLocationClient;
 	private DrawerLayout drawerLayout;
 	private NavigationView navigationView;
 	private GoogleMap map;
@@ -56,7 +55,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		MapFragment mapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
-		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+		FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 		fusedLocationClient.getLastLocation()
 				.addOnSuccessListener(this, location ->
 				{

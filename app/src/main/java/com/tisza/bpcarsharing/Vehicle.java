@@ -34,6 +34,11 @@ public class Vehicle
 		this.hasChargeInfo = hasChargeInfo;
 	}
 
+	public boolean isVisible()
+	{
+		return BuildConfig.DEBUG || category.getFuel() == Fuel.ELECTRICITY;
+	}
+
 	public String getId()
 	{
 		return id;

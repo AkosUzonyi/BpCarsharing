@@ -56,6 +56,9 @@ public class VehicleMarkerManager
 			Vehicle vehicle = vehicles.get(id);
 			Marker marker = markers.get(id);
 
+			if (!vehicle.isVisible())
+				continue;
+
 			LatLng position = new LatLng(vehicle.getLat(), vehicle.getLng());
 
 			if (marker == null)

@@ -10,6 +10,8 @@ import java.util.*;
 
 public class Blinkee implements CarsharingService
 {
+	private final Random rnd = new Random();
+
 	@Override
 	public String getID()
 	{
@@ -33,8 +35,8 @@ public class Blinkee implements CarsharingService
 	{
 		Collection<Vehicle> vehicles = new ArrayList<>();
 
-		String jsonText = Utils.downloadText("https://blinkee.city/api/regions/11/vehicles");
-		JSONArray jsonArray = new JSONObject(jsonText).getJSONObject("data").getJSONArray("items");
+		String jsonText = Utils.downloadText("https://blinkee.city/api/vehicles/11");
+		JSONArray jsonArray = new JSONArray(jsonText);
 
 		for (int i = 0; i < jsonArray.length(); i++)
 		{
@@ -42,7 +44,7 @@ public class Blinkee implements CarsharingService
 
 			JSONObject positionJSON = vehicleJSON.getJSONObject("position");
 
-			String id = vehicleJSON.getString("id");
+			int id = rnd.nextInt();
 			double gps_lat = positionJSON.getDouble("lat");
 			double gps_long = positionJSON.getDouble("lng");
 			String plate_number = "blinkee";

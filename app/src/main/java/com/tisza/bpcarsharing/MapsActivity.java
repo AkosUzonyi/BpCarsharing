@@ -25,7 +25,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	private static final String SP_KEY_CAR = "car";
 	private static final String SP_KEY_ZONE = "zone";
 
-	private static final int DOWNLOAD_INTERVAL = 20;
+	private static final int DOWNLOAD_INTERVAL = 40;
 	private static final LatLng BP_CENTER = new LatLng(47.495225, 19.045508);
 	private static final LatLngBounds BP_BOUNDS = new LatLngBounds(new LatLng(47.463008, 18.983644), new LatLng(47.550324, 19.157741));
 	private static final int BP_ZOOM = 12, MY_LOCATION_ZOOM = 15;

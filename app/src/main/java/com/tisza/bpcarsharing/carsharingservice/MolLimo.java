@@ -75,23 +75,23 @@ public class MolLimo implements CarsharingService
 	}
 
 	@Override
-	public List<List<LatLng>> downloadZone() throws IOException, JSONException
+	public List<ShapeCoords> downloadZone() throws IOException, JSONException
 	{
-		List<List<LatLng>> zone = new ArrayList<>();
+		List<ShapeCoords> zone = new ArrayList<>();
 
 		String text = Utils.downloadText("https://www.mollimo.hu/data/homezone.js?Isg7gJs12R");
 		Matcher matcher = shapePattern.matcher(text);
 
 		while (matcher.find())
 		{
-			List<LatLng> shape = new ArrayList<>();
+			ShapeCoords shape = new ShapeCoords();
 			JSONArray shapeJSONArray = new JSONArray(matcher.group(1));
 			for (int i = 0; i < shapeJSONArray.length(); i++)
 			{
 				JSONObject coordsJSON = shapeJSONArray.getJSONObject(i);
 				double lat = coordsJSON.getDouble("lat");
 				double lng = coordsJSON.getDouble("lng");
-				shape.add(new LatLng(lat, lng));
+				shape.coords.add(new LatLng(lat, lng));
 			}
 
 			zone.add(shape);

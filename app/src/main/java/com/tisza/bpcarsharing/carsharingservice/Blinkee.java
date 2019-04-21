@@ -55,12 +55,12 @@ public class Blinkee implements CarsharingService
 		return vehicles;
 	}
 
-	public List<List<LatLng>> downloadZone() throws IOException, JSONException
+	public List<ShapeCoords> downloadZone() throws IOException, JSONException
 	{
-		List<List<LatLng>> zone = new ArrayList<>();
+		List<ShapeCoords> zone = new ArrayList<>();
 
 		String text = Utils.downloadText("https://blinkee.city/api/regions");
-		JSONArray jsonArray = new JSONObject(text).getJSONObject("data").getJSONArray("items");
+		JSONArray jsonArray = new JSONArray(text);
 		JSONObject bpRegionJSON = getJSONObjectFromArrayByID(jsonArray, 11);
 		JSONArray zoneJSONArray = bpRegionJSON
 				.getJSONArray("zones")
@@ -69,22 +69,32 @@ public class Blinkee implements CarsharingService
 				.getJSONArray("coordinates")
 				.getJSONArray(0);
 
+		ShapeCoords shape = new ShapeCoords();
 		for (int i = 0; i < zoneJSONArray.length(); i++)
 		{
 			JSONArray shapeJSONArray = zoneJSONArray.getJSONArray(i);
-			List<LatLng> shape = new ArrayList<>();
+
+			List<LatLng> coords;
+			if (i == 0)
+			{
+				coords = shape.coords;
+			}
+			else
+			{
+				coords = new ArrayList<>();
+				shape.holes.add(coords);
+			}
 
 			for (int j = 0; j < shapeJSONArray.length(); j++)
 			{
 				JSONArray coordsJSON = shapeJSONArray.getJSONArray(j);
-				double lat = coordsJSON.getDouble(1);
-				double lng = coordsJSON.getDouble(0);
-				shape.add(new LatLng(lat, lng));
+				double lat = coordsJSON.getDouble(0);
+				double lng = coordsJSON.getDouble(1);
+				coords.add(new LatLng(lat, lng));
 			}
-
-			zone.add(shape);
 		}
 
+		zone.add(shape);
 		return zone;
 	}
 

@@ -1,7 +1,6 @@
 package com.tisza.bpcarsharing.carsharingservice;
 
 import android.graphics.*;
-import android.util.*;
 import com.google.android.gms.maps.model.*;
 import com.tisza.bpcarsharing.*;
 import org.json.*;
@@ -56,9 +55,9 @@ public class GreenGo implements CarsharingService
 		return vehicles;
 	}
 
-	public List<List<LatLng>> downloadZone() throws IOException, JSONException
+	public List<ShapeCoords> downloadZone() throws IOException, JSONException
 	{
-		List<List<LatLng>> zone = new ArrayList<>();
+		List<ShapeCoords> zone = new ArrayList<>();
 
 		String pageHTML = Utils.downloadText("https://www.greengo.hu");
 
@@ -72,14 +71,14 @@ public class GreenGo implements CarsharingService
 		for (int i = 0; i < jsonArray.length(); i++)
 		{
 			JSONArray shapeJSONArray = new JSONArray(jsonArray.getJSONObject(i).getString("area"));
-			List<LatLng> shape = new ArrayList<>();
+			ShapeCoords shape = new ShapeCoords();
 
 			for (int j = 0; j < shapeJSONArray.length(); j++)
 			{
 				JSONArray coordsJSON = shapeJSONArray.getJSONArray(j);
 				double lat = coordsJSON.getDouble(1);
 				double lng = coordsJSON.getDouble(0);
-				shape.add(new LatLng(lat, lng));
+				shape.coords.add(new LatLng(lat, lng));
 			}
 
 			zone.add(shape);

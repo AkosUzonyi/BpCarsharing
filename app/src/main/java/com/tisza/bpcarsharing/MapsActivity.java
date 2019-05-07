@@ -4,6 +4,7 @@ import android.*;
 import android.app.*;
 import android.content.*;
 import android.content.pm.*;
+import android.location.*;
 import android.net.*;
 import android.os.*;
 import android.support.design.widget.*;
@@ -60,17 +61,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		MapFragment mapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
-		FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-		fusedLocationClient.getLastLocation()
-				.addOnSuccessListener(this, location ->
-				{
-					if (location != null)
-					{
-						LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-						if (BP_BOUNDS.contains(latLng))
-							map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MY_LOCATION_ZOOM));
-					}
-				});
+		LocationServices.getFusedLocationProviderClient(this).getLastLocation().addOnSuccessListener(this, this::onLocationFound);
 
 		setActionBar(findViewById(R.id.toolbar));
 		ActionBar actionBar = getActionBar();
@@ -133,19 +124,39 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		map = googleMap;
 		map.moveCamera(CameraUpdateFactory.newLatLngZoom(BP_CENTER, BP_ZOOM));
 		map.setOnInfoWindowClickListener(this);
-		tryEnableMapLocation();
+
+		boolean locationEnabled = tryEnableMapLocation();
+		//if location is enabled, wait for it, so marker placement can start with the near ones
+		if (!locationEnabled)
+			for (VehicleMarkerManager vehicleMarkerManager : vehicleMarkerManagers)
+				vehicleMarkerManager.setMap(map);
 
 		for (ZoneDownloader zoneDownloader : zoneDownloaders)
 			zoneDownloader.setMap(map);
-
-		for (VehicleMarkerManager vehicleMarkerManager : vehicleMarkerManagers)
-			vehicleMarkerManager.setMap(googleMap);
 	}
 
-	private void tryEnableMapLocation()
+	private boolean tryEnableMapLocation()
 	{
-		if (map != null && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+		boolean hasPermission = map != null && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+		if (hasPermission)
 			map.setMyLocationEnabled(true);
+
+		return hasPermission;
+	}
+
+	private void onLocationFound(Location location)
+	{
+		if (location == null)
+			return;
+
+		LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+		if (BP_BOUNDS.contains(latLng))
+			map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MY_LOCATION_ZOOM));
+
+		for (VehicleMarkerManager vehicleMarkerManager : vehicleMarkerManagers)
+			vehicleMarkerManager.setMap(map);
 	}
 
 	@Override

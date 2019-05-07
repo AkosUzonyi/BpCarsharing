@@ -1,5 +1,6 @@
 package com.tisza.bpcarsharing;
 
+import android.os.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
@@ -11,6 +12,9 @@ public class VehicleMarkerManager
 	private Map<String, Marker> markers = new HashMap<>();
 
 	private GoogleMap map;
+
+	private Handler handler = new Handler();
+	private Runnable updateAllMarkersRunnable = () -> updateMarkers(false);
 
 	public void setMap(GoogleMap map)
 	{
@@ -34,8 +38,17 @@ public class VehicleMarkerManager
 
 	private void updateMarkers()
 	{
+		updateMarkers(true);
+		handler.removeCallbacks(updateAllMarkersRunnable);
+		handler.postDelayed(updateAllMarkersRunnable, 500);
+	}
+
+	private void updateMarkers(boolean onlyVisible)
+	{
 		if (map == null)
 			return;
+
+		LatLngBounds visibleBounds = map.getProjection().getVisibleRegion().latLngBounds;
 
 		Iterator<Map.Entry<String, Marker>> it = markers.entrySet().iterator();
 		while (it.hasNext())
@@ -61,20 +74,29 @@ public class VehicleMarkerManager
 
 			LatLng position = new LatLng(vehicle.getLat(), vehicle.getLng());
 
+			if (onlyVisible && !visibleBounds.contains(position))
+				continue;
+
 			if (marker == null)
 			{
 				MarkerOptions markerOptions = new MarkerOptions();
 				markerOptions.position(position);
+				markerOptions.title(vehicle.getPlate());
+				if (vehicle.hasChargeInfo())
+					markerOptions.snippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
+				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
+
 				marker = map.addMarker(markerOptions);
 				markers.put(id, marker);
 			}
-
-			marker.setPosition(position);
-			marker.setTitle(vehicle.getPlate());
-			if (vehicle.hasChargeInfo())
-				marker.setSnippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
-			//marker.setAlpha(vehicle.getChargePercentage() / 100F);
-			marker.setIcon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
+			else
+			{
+				marker.setPosition(position);
+				marker.setTitle(vehicle.getPlate());
+				if (vehicle.hasChargeInfo())
+					marker.setSnippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
+				marker.setIcon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
+			}
 			marker.setTag(vehicle);
 		}
 	}

@@ -14,7 +14,7 @@ public interface CarsharingService
 	public int getColor();
 	public Collection<? extends VehicleCategory> getVehicleCategories();
 	public Collection<Vehicle> downloadVehicles() throws IOException, JSONException;
-	public List<ShapeCoords> downloadZone() throws IOException, JSONException;
+	public List<Shape> downloadZone() throws IOException, JSONException;
 	public String getAppPackage();
 	public int getMenuID();
 }

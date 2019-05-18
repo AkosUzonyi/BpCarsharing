@@ -15,7 +15,7 @@ public class ZoneDownloader
 
 	private boolean visible = false;
 	private GoogleMap map = null;
-	private List<ShapeCoords> coordinates = null;
+	private List<Shape> coordinates = null;
 	private List<Polygon> polygons = new ArrayList<>();
 
 	public ZoneDownloader(CarsharingService carsharingService, ProgressBarHandler progressBarHandler)
@@ -49,7 +49,7 @@ public class ZoneDownloader
 
 		int color = carsharingService.getColor();
 
-		for (ShapeCoords shape : coordinates)
+		for (Shape shape : coordinates)
 		{
 			PolygonOptions polygonOptions = new PolygonOptions()
 					.addAll(shape.coords)
@@ -77,7 +77,7 @@ public class ZoneDownloader
 		new DownloadTask().execute();
 	}
 
-	private class DownloadTask extends AsyncTask<Void, Void, List<ShapeCoords>>
+	private class DownloadTask extends AsyncTask<Void, Void, List<Shape>>
 	{
 		@Override
 		protected void onPreExecute()
@@ -86,7 +86,7 @@ public class ZoneDownloader
 		}
 
 		@Override
-		protected List<ShapeCoords> doInBackground(Void... voids)
+		protected List<Shape> doInBackground(Void... voids)
 		{
 			try
 			{
@@ -100,7 +100,7 @@ public class ZoneDownloader
 		}
 
 		@Override
-		protected void onPostExecute(List<ShapeCoords> zone)
+		protected void onPostExecute(List<Shape> zone)
 		{
 			progressBarHandler.endProcess();
 

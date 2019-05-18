@@ -55,9 +55,9 @@ public class Blinkee implements CarsharingService
 		return vehicles;
 	}
 
-	public List<ShapeCoords> downloadZone() throws IOException, JSONException
+	public List<Shape> downloadZone() throws IOException, JSONException
 	{
-		List<ShapeCoords> zone = new ArrayList<>();
+		List<Shape> zone = new ArrayList<>();
 
 		String text = Utils.downloadText("https://blinkee.city/api/regions");
 		JSONArray jsonArray = new JSONArray(text);
@@ -69,7 +69,7 @@ public class Blinkee implements CarsharingService
 				.getJSONArray("coordinates")
 				.getJSONArray(0);
 
-		ShapeCoords shape = new ShapeCoords();
+		Shape shape = new Shape();
 		for (int i = 0; i < zoneJSONArray.length(); i++)
 		{
 			JSONArray shapeJSONArray = zoneJSONArray.getJSONArray(i);

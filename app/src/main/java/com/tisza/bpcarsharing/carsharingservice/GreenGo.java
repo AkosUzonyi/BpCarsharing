@@ -55,9 +55,9 @@ public class GreenGo implements CarsharingService
 		return vehicles;
 	}
 
-	public List<ShapeCoords> downloadZone() throws IOException, JSONException
+	public List<Shape> downloadZone() throws IOException, JSONException
 	{
-		List<ShapeCoords> zone = new ArrayList<>();
+		List<Shape> zone = new ArrayList<>();
 
 		String pageHTML = Utils.downloadText("https://www.greengo.hu");
 
@@ -71,7 +71,7 @@ public class GreenGo implements CarsharingService
 		for (int i = 0; i < jsonArray.length(); i++)
 		{
 			JSONArray shapeJSONArray = new JSONArray(jsonArray.getJSONObject(i).getString("area"));
-			ShapeCoords shape = new ShapeCoords();
+			Shape shape = new Shape();
 
 			for (int j = 0; j < shapeJSONArray.length(); j++)
 			{

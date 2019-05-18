@@ -100,8 +100,7 @@ public class VehicleMarkerManager
 				MarkerOptions markerOptions = new MarkerOptions();
 				markerOptions.position(position);
 				markerOptions.title(vehicle.getPlate());
-				if (vehicle.hasChargeInfo())
-					markerOptions.snippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
+				markerOptions.snippet(vehicle.getRange() + " km");
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
 				markerOptions.visible(visibleServices.contains(vehicle.getCategory().getCarsharingService()));
 
@@ -112,8 +111,7 @@ public class VehicleMarkerManager
 			{
 				marker.setPosition(position);
 				marker.setTitle(vehicle.getPlate());
-				if (vehicle.hasChargeInfo())
-					marker.setSnippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
+				marker.setSnippet(vehicle.getRange() + " km");
 				marker.setIcon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
 				marker.setVisible(visibleServices.contains(vehicle.getCategory().getCarsharingService()));
 			}

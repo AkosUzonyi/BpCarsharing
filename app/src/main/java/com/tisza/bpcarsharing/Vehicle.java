@@ -6,20 +6,9 @@ public class Vehicle
 	private final double lat, lng;
 	private final String plate;
 	private final int range;
-	private final boolean hasChargeInfo;
 	private final VehicleCategory category;
 
-	public Vehicle(String id, double lat, double lng, String plate, VehicleCategory category)
-	{
-		this(id, lat, lng, plate, 0, category, false);
-	}
-
 	public Vehicle(String id, double lat, double lng, String plate, int range, VehicleCategory category)
-	{
-		this(id, lat, lng, plate, range, category, true);
-	}
-
-	private Vehicle(String id, double lat, double lng, String plate, int range, VehicleCategory category, boolean hasChargeInfo)
 	{
 		this.id = id;
 		this.lat = lat;
@@ -27,7 +16,6 @@ public class Vehicle
 		this.plate = plate;
 		this.category = category;
 		this.range = range;
-		this.hasChargeInfo = hasChargeInfo;
 	}
 
 	public boolean isVisible()
@@ -60,21 +48,8 @@ public class Vehicle
 		return category;
 	}
 
-	public boolean hasChargeInfo()
-	{
-		return hasChargeInfo;
-	}
-
-	public int getChargePercentage()
-	{
-		return (int)(getRange() / category.getMaxRange() * 100);
-	}
-
 	public int getRange()
 	{
-		if (!hasChargeInfo)
-			throw new UnsupportedOperationException();
-
 		return range;
 	}
 }

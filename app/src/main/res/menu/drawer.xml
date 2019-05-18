@@ -26,6 +26,11 @@
                 android:title="@string/blinkee"
                 app:actionLayout="@layout/carsharing_service_switch"
             />
+            <item
+                android:id="@+id/lime_swicth"
+                android:title="@string/lime"
+                app:actionLayout="@layout/carsharing_service_switch"
+            />
         </menu>
     </item>
 </menu>

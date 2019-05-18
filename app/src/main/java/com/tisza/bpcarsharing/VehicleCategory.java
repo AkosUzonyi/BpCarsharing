@@ -9,6 +9,7 @@ public enum VehicleCategory
 	MOL_LIMO_EUP(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_AZURE - 20, 150, Fuel.ELECTRICITY),
 	MOL_LIMO_MERCEDES(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_VIOLET, 350, Fuel.PETROL),
 	BLINKEE(CarsharingService.BLINKEE, BitmapDescriptorFactory.HUE_ORANGE, 70, Fuel.ELECTRICITY),
+	LIME_S(CarsharingService.LIME, BitmapDescriptorFactory.HUE_YELLOW, 24.1F, Fuel.ELECTRICITY),
 	;
 
 	private final CarsharingService carsharingService;

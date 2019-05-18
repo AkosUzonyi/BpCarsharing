@@ -1,7 +1,7 @@
 package com.tisza.bpcarsharing;
 
 import android.os.*;
-import com.tisza.bpcarsharing.carsharingservice.*;
+import org.json.*;
 
 import java.util.*;
 
@@ -9,7 +9,6 @@ public class VehicleDownloader
 {
 	private final Runnable downloadCarsRunnable = this::downloadCars;
 	private final Handler handler;
-	private final CarsharingService carsharingService;
 	private final VehiclesDownloadedListener vehiclesDownloadedListener;
 	private final ProgressBarHandler progressBarHandler;
 
@@ -18,10 +17,9 @@ public class VehicleDownloader
 	private VehicleDownloadAsyncTask currentDownloadTask = null;
 	private boolean newDownloadRequestPending = false;
 
-	public VehicleDownloader(Looper looper, CarsharingService carsharingService, int downloadInterval, VehiclesDownloadedListener vehiclesDownloadedListener, ProgressBarHandler progressBarHandler)
+	public VehicleDownloader(Looper looper, int downloadInterval, VehiclesDownloadedListener vehiclesDownloadedListener, ProgressBarHandler progressBarHandler)
 	{
 		handler = new Handler(looper);
-		this.carsharingService = carsharingService;
 		this.downloadInterval = downloadInterval;
 		this.vehiclesDownloadedListener = vehiclesDownloadedListener;
 		this.progressBarHandler = progressBarHandler;
@@ -87,7 +85,28 @@ public class VehicleDownloader
 		{
 			try
 			{
-				return carsharingService.downloadVehicles();
+				Collection<Vehicle> vehicles = new ArrayList<>();
+
+				String jsonText = Utils.downloadText("http://akos0.ddns.net/carsharing/vehicles");
+				JSONArray jsonArray = new JSONArray(jsonText);
+
+				for (int i = 0; i < jsonArray.length(); i++)
+				{
+					JSONObject vehicleJSON = jsonArray.getJSONObject(i);
+
+					String provider = vehicleJSON.getString("service");
+					String id = vehicleJSON.optString("id", provider + new Random().nextInt());
+					double lat = vehicleJSON.getDouble("lat");
+					double lng = vehicleJSON.getDouble("lng");
+					String plate = vehicleJSON.optString("plate", provider);
+					int range = vehicleJSON.optInt("range", 0);
+					int charge = vehicleJSON.optInt("charge", 0);
+					String model = vehicleJSON.optString("model", null);
+
+					vehicles.add(new Vehicle(id, lat, lng, plate, range, VehicleCategory.fromModel(CarsharingService.fromString(provider), model)));
+				}
+
+				return vehicles;
 			}
 			catch (Exception e)
 			{

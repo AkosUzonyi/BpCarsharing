@@ -10,6 +10,7 @@ public class VehicleMarkerManager
 {
 	private Map<String, Vehicle> vehicles = new HashMap<>();
 	private Map<String, Marker> markers = new HashMap<>();
+	private Set<CarsharingService> visibleServices = new HashSet<>();
 
 	private GoogleMap map;
 
@@ -25,6 +26,23 @@ public class VehicleMarkerManager
 		markers.clear();
 
 		updateMarkers();
+	}
+
+	public void setCarsharingServiceVisible(CarsharingService carsharingService, boolean visible)
+	{
+		if (visible)
+			visibleServices.add(carsharingService);
+		else
+			visibleServices.remove(carsharingService);
+
+		for (Map.Entry<String, Marker> entry : markers.entrySet())
+		{
+			String id = entry.getKey();
+			Marker marker = entry.getValue();
+
+			if (vehicles.get(id).getCategory().getCarsharingService() == carsharingService)
+				marker.setVisible(visible);
+		}
 	}
 
 	public void setVehicles(Collection<? extends Vehicle> newVehicles)
@@ -85,6 +103,7 @@ public class VehicleMarkerManager
 				if (vehicle.hasChargeInfo())
 					markerOptions.snippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
+				markerOptions.visible(visibleServices.contains(vehicle.getCategory().getCarsharingService()));
 
 				marker = map.addMarker(markerOptions);
 				markers.put(id, marker);
@@ -96,6 +115,7 @@ public class VehicleMarkerManager
 				if (vehicle.hasChargeInfo())
 					marker.setSnippet(vehicle.getChargePercentage() + "% | " + vehicle.getRange() + " km");
 				marker.setIcon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
+				marker.setVisible(visibleServices.contains(vehicle.getCategory().getCarsharingService()));
 			}
 			marker.setTag(vehicle);
 		}

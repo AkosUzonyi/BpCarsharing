@@ -1,31 +1,27 @@
 package com.tisza.bpcarsharing;
 
-import com.tisza.bpcarsharing.carsharingservice.*;
-
 public class Vehicle
 {
 	private final String id;
-	private final CarsharingService carsharingService;
 	private final double lat, lng;
 	private final String plate;
 	private final int range;
 	private final boolean hasChargeInfo;
 	private final VehicleCategory category;
 
-	public Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, VehicleCategory category)
+	public Vehicle(String id, double lat, double lng, String plate, VehicleCategory category)
 	{
-		this(id, carsharingService, lat, lng, plate, 0, category, false);
+		this(id, lat, lng, plate, 0, category, false);
 	}
 
-	public Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, int range, VehicleCategory category)
+	public Vehicle(String id, double lat, double lng, String plate, int range, VehicleCategory category)
 	{
-		this(id, carsharingService, lat, lng, plate, range, category, true);
+		this(id, lat, lng, plate, range, category, true);
 	}
 
-	private Vehicle(String id, CarsharingService carsharingService, double lat, double lng, String plate, int range, VehicleCategory category, boolean hasChargeInfo)
+	private Vehicle(String id, double lat, double lng, String plate, int range, VehicleCategory category, boolean hasChargeInfo)
 	{
 		this.id = id;
-		this.carsharingService = carsharingService;
 		this.lat = lat;
 		this.lng = lng;
 		this.plate = plate;
@@ -42,11 +38,6 @@ public class Vehicle
 	public String getId()
 	{
 		return id;
-	}
-
-	public CarsharingService getCarsharingService()
-	{
-		return carsharingService;
 	}
 
 	public double getLat()

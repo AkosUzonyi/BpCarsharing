@@ -4,23 +4,21 @@ import android.graphics.*;
 import android.os.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
-import com.tisza.bpcarsharing.carsharingservice.*;
+import org.json.*;
 
 import java.util.*;
 
 public class ZoneDownloader
 {
-	private final CarsharingService carsharingService;
 	private final ProgressBarHandler progressBarHandler;
 
-	private boolean visible = false;
+	private Set<CarsharingService> visibleServices = new HashSet<>();
 	private GoogleMap map = null;
 	private List<Shape> coordinates = null;
 	private List<Polygon> polygons = new ArrayList<>();
 
-	public ZoneDownloader(CarsharingService carsharingService, ProgressBarHandler progressBarHandler)
+	public ZoneDownloader(ProgressBarHandler progressBarHandler)
 	{
-		this.carsharingService = carsharingService;
 		this.progressBarHandler = progressBarHandler;
 	}
 
@@ -31,11 +29,16 @@ public class ZoneDownloader
 		createPolygons();
 	}
 
-	public void setVisible(boolean visible)
+	public void setCarsharingServiceVisible(CarsharingService carsharingService, boolean visible)
 	{
-		this.visible = visible;
+		if (visible)
+			visibleServices.add(carsharingService);
+		else
+			visibleServices.remove(carsharingService);
+
 		for (Polygon polygon : polygons)
-			polygon.setVisible(visible);
+			if (polygon.getTag() == carsharingService)
+				polygon.setVisible(visible);
 	}
 
 	private void createPolygons()
@@ -47,22 +50,22 @@ public class ZoneDownloader
 		if (map == null || coordinates == null)
 			return;
 
-		int color = carsharingService.getColor();
-
 		for (Shape shape : coordinates)
 		{
+			int color = shape.carsharingService.getColor();
 			PolygonOptions polygonOptions = new PolygonOptions()
 					.addAll(shape.coords)
 					.fillColor(Color.argb(50, Color.red(color), Color.green(color), Color.blue(color)))
 					.strokeColor(Color.BLACK)
 					.strokeWidth(2)
-					.visible(visible)
+					.visible(visibleServices.contains(shape.carsharingService))
 					;
 
 			for (List<LatLng> holeCoords : shape.holes)
 				polygonOptions.addHole(holeCoords);
 
 			Polygon polygon = map.addPolygon(polygonOptions);
+			polygon.setTag(shape.carsharingService);
 			polygons.add(polygon);
 		}
 	}
@@ -85,12 +88,47 @@ public class ZoneDownloader
 			progressBarHandler.startProcess();
 		}
 
+		private void parseShape(JSONArray jsonArray, List<LatLng> list) throws JSONException
+		{
+			for (int j = 0; j < jsonArray.length(); j++)
+			{
+				JSONObject coordsJSON = jsonArray.getJSONObject(j);
+				double lat = coordsJSON.getDouble("lat");
+				double lng = coordsJSON.getDouble("lng");
+				list.add(new LatLng(lat, lng));
+			}
+		}
+
 		@Override
 		protected List<Shape> doInBackground(Void... voids)
 		{
 			try
 			{
-				return carsharingService.downloadZone();
+				List<Shape> zone = new ArrayList<>();
+
+				String jsonText = Utils.downloadText("http://akos0.ddns.net/carsharing/zones");
+				JSONArray jsonArray = new JSONArray(jsonText);
+
+				for (int i = 0; i < jsonArray.length(); i++)
+				{
+					JSONObject shapeJSON = jsonArray.getJSONObject(i);
+					Shape shape = new Shape();
+
+					shape.carsharingService = CarsharingService.fromString(shapeJSON.getString("service"));
+					parseShape(shapeJSON.getJSONArray("coords"), shape.coords);
+
+					JSONArray holesJSON = shapeJSON.getJSONArray("holes");
+					for (int j = 0; j < holesJSON.length(); j++)
+					{
+						List<LatLng> hole = new ArrayList<>();
+						parseShape(holesJSON.getJSONArray(j), hole);
+						shape.holes.add(hole);
+					}
+
+					zone.add(shape);
+				}
+
+				return zone;
 			}
 			catch (Exception e)
 			{

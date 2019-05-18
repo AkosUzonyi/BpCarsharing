@@ -16,9 +16,6 @@ import android.widget.*;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
-import com.tisza.bpcarsharing.carsharingservice.*;
-
-import java.util.*;
 
 public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, NetworkStateReceiver.NetworkStateListener
 {
@@ -38,9 +35,9 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 
 	private ProgressBarHandler progressBarHandler;
 
-	private Collection<VehicleMarkerManager> vehicleMarkerManagers = new ArrayList<>();
-	private Collection<VehicleDownloader> activeVehicleDownloaders = new ArrayList<>();
-	private Collection<ZoneDownloader> zoneDownloaders = new ArrayList<>();
+	private VehicleMarkerManager vehicleMarkerManager;
+	private VehicleDownloader vehicleDownloader;
+	private ZoneDownloader zoneDownloader;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -69,33 +66,17 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
 		SharedPreferences sharedPreferences = getSharedPreferences(SP_NAME_SWITCH, Context.MODE_PRIVATE);
-		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
+		vehicleMarkerManager = new VehicleMarkerManager();
+		vehicleDownloader = new VehicleDownloader(getMainLooper(), DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles, progressBarHandler);
+		zoneDownloader = new ZoneDownloader(progressBarHandler);
+		for (CarsharingService carsharingService : CarsharingService.values())
 		{
-			VehicleMarkerManager vehicleMarkerManager = new VehicleMarkerManager();
-			vehicleMarkerManagers.add(vehicleMarkerManager);
-			VehicleDownloader vehicleDownloader = new VehicleDownloader(getMainLooper(), carsharingService, DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles, progressBarHandler);
-
 			Switch carSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.car_switch);
-			carSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
-			{
-				if (isChecked)
-				{
-					activeVehicleDownloaders.add(vehicleDownloader);
-					vehicleDownloader.start();
-				}
-				else
-				{
-					activeVehicleDownloaders.remove(vehicleDownloader);
-					vehicleDownloader.stop();
-				}
-			});
+			carSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> vehicleMarkerManager.setCarsharingServiceVisible(carsharingService, isChecked));
 			carSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_CAR + carsharingService.getID(), true));
 
-			ZoneDownloader zoneDownloader = new ZoneDownloader(carsharingService, progressBarHandler);
-			zoneDownloaders.add(zoneDownloader);
-
 			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
-			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> zoneDownloader.setVisible(isChecked));
+			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> zoneDownloader.setCarsharingServiceVisible(carsharingService, isChecked));
 			zoneSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_ZONE + carsharingService.getID(), false));
 		}
 	}
@@ -128,11 +109,9 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		boolean locationEnabled = tryEnableMapLocation();
 		//if location is enabled, wait for it, so marker placement can start with the near ones
 		if (!locationEnabled)
-			for (VehicleMarkerManager vehicleMarkerManager : vehicleMarkerManagers)
-				vehicleMarkerManager.setMap(map);
+			vehicleMarkerManager.setMap(map);
 
-		for (ZoneDownloader zoneDownloader : zoneDownloaders)
-			zoneDownloader.setMap(map);
+		zoneDownloader.setMap(map);
 	}
 
 	private boolean tryEnableMapLocation()
@@ -155,8 +134,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		if (BP_BOUNDS.contains(latLng))
 			map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MY_LOCATION_ZOOM));
 
-		for (VehicleMarkerManager vehicleMarkerManager : vehicleMarkerManagers)
-			vehicleMarkerManager.setMap(map);
+		vehicleMarkerManager.setMap(map);
 	}
 
 	@Override
@@ -176,7 +154,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		SharedPreferences sharedPreferences = getSharedPreferences(SP_NAME_SWITCH, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		NavigationView navigationView = findViewById(R.id.nav_view);
-		for (CarsharingService carsharingService : CarsharingService.CARSHARING_SERVICES)
+		for (CarsharingService carsharingService : CarsharingService.values())
 		{
 			Switch carSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.car_switch);
 			editor.putBoolean(SP_KEY_CAR + carsharingService.getID(), carSwitch.isChecked());
@@ -191,7 +169,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 	{
 		Vehicle vehicle = (Vehicle)marker.getTag();
 
-		Intent launchIntent = getPackageManager().getLaunchIntentForPackage(vehicle.getCarsharingService().getAppPackage());
+		Intent launchIntent = getPackageManager().getLaunchIntentForPackage(vehicle.getCategory().getCarsharingService().getAppPackage());
 		if (launchIntent == null)
 		{
 			Toast.makeText(this, R.string.app_not_installed, Toast.LENGTH_LONG).show();
@@ -208,18 +186,15 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 		setDownloadingActive(isConnected);
 
 		if (isConnected)
-			for (ZoneDownloader zoneDownloader : zoneDownloaders)
-				if (!zoneDownloader.isReady())
-					zoneDownloader.download();
+			if (!zoneDownloader.isReady())
+				zoneDownloader.download();
 	}
 
 	private void setDownloadingActive(boolean active)
 	{
-		for (VehicleDownloader vehicleDownloader : activeVehicleDownloaders)
-			if (active)
-				vehicleDownloader.start();
-			else
-				vehicleDownloader.stop();
-
+		if (active)
+			vehicleDownloader.start();
+		else
+			vehicleDownloader.stop();
 	}
 }

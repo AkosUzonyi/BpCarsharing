@@ -1,4 +1,4 @@
-package com.tisza.bpcarsharing.carsharingservice;
+package com.tisza.bpcarsharing;
 
 import android.content.*;
 import android.net.*;

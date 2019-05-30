@@ -6,7 +6,7 @@ public enum CarsharingService
 {
 	GREENGO("greengo", Color.GREEN, "com.GreenGo", R.id.greengo_switch),
 	MOLLIMO("mollimo", Color.BLUE, "com.vulog.carshare.mol", R.id.mollimo_switch),
-	BLINKEE("blinkee", Color.rgb(200, 200, 0), "pl.blinkee.mobile", R.id.blinkee_swicth),
+	BLINKEE("blinkee", Color.rgb(255, 180, 0), "pl.blinkee.mobile", R.id.blinkee_swicth),
 	LIME("lime", Color.YELLOW, "com.limebike", R.id.lime_swicth),
 	;
 

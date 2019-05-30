@@ -2,6 +2,7 @@ package com.tisza.bpcarsharing;
 
 import android.graphics.*;
 import android.os.*;
+import android.util.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 import org.json.*;
@@ -14,7 +15,7 @@ public class ZoneDownloader
 
 	private Set<CarsharingService> visibleServices = new HashSet<>();
 	private GoogleMap map = null;
-	private List<Shape> coordinates = null;
+	private List<Shape> shapes = null;
 	private List<Polygon> polygons = new ArrayList<>();
 
 	public ZoneDownloader(ProgressBarHandler progressBarHandler)
@@ -47,10 +48,10 @@ public class ZoneDownloader
 			polygon.remove();
 		polygons.clear();
 
-		if (map == null || coordinates == null)
+		if (map == null || shapes == null)
 			return;
 
-		for (Shape shape : coordinates)
+		for (Shape shape : shapes)
 		{
 			int color = shape.carsharingService.getColor();
 			PolygonOptions polygonOptions = new PolygonOptions()
@@ -72,7 +73,7 @@ public class ZoneDownloader
 
 	public boolean isReady()
 	{
-		return coordinates != null;
+		return shapes != null;
 	}
 
 	public void download()
@@ -138,11 +139,11 @@ public class ZoneDownloader
 		}
 
 		@Override
-		protected void onPostExecute(List<Shape> zone)
+		protected void onPostExecute(List<Shape> result)
 		{
 			progressBarHandler.endProcess();
 
-			coordinates = zone;
+			shapes = result;
 			createPolygons();
 		}
 

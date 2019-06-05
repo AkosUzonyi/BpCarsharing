@@ -1,0 +1,90 @@
+#!/bin/bash
+
+#vehicle
+#[{id, service, plate, lat, lng, range, model}]
+
+#zone
+#[{service, coords:[{lat, lng}], holes:[[{lat, lng}]]}]
+
+curl() {
+	command curl 2>/dev/null "$@"
+}
+
+vehicle_file="$1"
+zone_file="$2"
+
+source "/home/akos/carsharing-auth"
+
+lime_recursive_download() {
+	local ne_lat=$1
+	local ne_lng=$2
+	local sw_lat=$3
+	local sw_lng=$4
+
+	local url="https://web-production.lime.bike/api/rider/v1/views/map?ne_lat=$ne_lat&ne_lng=$ne_lng&sw_lat=$sw_lat&sw_lng=$sw_lng&user_latitude=47.48&user_longitude=19.0484594&zoom=12.0"
+	local json=$(curl -H "$lm_auth" "$url")
+	if echo "$json" | jq -e '.error_message' > /dev/null ; then
+		return 1;
+	fi
+	local in_range_count=$(echo "$json" | jq -c ".data.attributes.bikes[].attributes | select(.latitude>=$ne_lat and .latitude<=$sw_lat and .longitude>=$ne_lng and .longitude<=$sw_lng)" | wc -l)
+
+	if ((in_range_count < 30)); then
+		echo "$json" | jq '.data.attributes.bikes[] // empty'
+		return 0
+	fi
+
+	lat_avg=$(bc <<< "scale=5; ($ne_lat + $sw_lat) / 2")
+	lng_avg=$(bc <<< "scale=5; ($ne_lng + $sw_lng) / 2")
+	lime_recursive_download $ne_lat $ne_lng $lat_avg $lng_avg
+	lime_recursive_download $ne_lat $lng_avg $lat_avg $sw_lng
+	lime_recursive_download $lat_avg $ne_lng $sw_lat $lng_avg
+	lime_recursive_download $lat_avg $lng_avg $sw_lat $sw_lng
+}
+
+gg() {
+	curl -g 'https://www.greengo.hu/divcontent.php?rnd=0.7767208702313471&funct=callAPI&APIname=getVehicleList&params\[P_ICON_SIZE\]=48&_=153782523104'  -H 'Referer: https://www.greengo.hu/' -H 'X-Requested-With: XMLHttpRequest' |
+	jq '.[] | {service: "greengo", id: .vehicle_id, plate: .plate_number, lat: .gps_lat, lng: .gps_long, range: .estimated_km, model: .make_desc}'
+}
+
+ml() {
+	curl -g 'https://www.mollimo.hu/data/cars.js?R3gE8PLjKk' | grep -Po '\[.*\]' |
+	jq '.[] | {service: "mollimo", id: .description.id, plate: .description.plate, lat: .location.position.lat, lng: .location.position.lon, range: .status.energyLevel, model: .description.model}'
+}
+
+bl() {
+	#curl -g https://blinkee.city/api/vehicles/11 |	
+	#jq '.[].position | {service: "blinkee", lat: .lat, lng: .lng}'
+
+	curl -H "$bl_auth" 'https://api.blinkee.city/v1/vehicles/byRegion/11' |
+	jq '.data[] | {service: "blinkee", id: .id, lat: .coordinates.latitude, lng: .coordinates.longitude, plate: .plates, model: .canonical_type, range: (.details[] | select (.title == "range") | .value | split(" ")[0]) }'
+}
+
+lm() {
+	lime_recursive_download 47.45 18.99 47.55 19.16 |
+	jq -s 'unique_by(.attributes.plate_number)[] | {service: "lime", id: .id, plate: .attributes.plate_number, lat: .attributes.latitude, lng: .attributes.longitude, range: (.attributes.meter_range/1000), model: .attributes.type_name}'
+}
+
+gg_zone() {
+	curl 'https://www.greengo.hu' | grep -Po 'var area = \K[^;]*' |
+	jq -r '.[].area' | jq -s '.[] | {service: "greengo", coords: map({lat: .[1], lng:.[0]}), holes:[]}'
+}
+
+ml_zone() {
+	curl 'https://www.mollimo.hu/data/homezone.js?Isg7gJs12R' | grep -Po '\[.*?\]' |
+	jq -s '.[] | {service: "mollimo", coords: ., holes:[]}'
+}
+
+bl_zone() {
+	curl 'https://blinkee.city/api/regions' |
+	jq '.[] | select(.id == 11) | .zones[0].area.coordinates[] | {service: "blinkee", coords: (.[0] | map({lat: .[0], lng: .[1]})), holes:[(.[1] | map({lat: .[0], lng: .[1]}))]}'
+}
+
+lm_zone() {
+	curl -H "$lm_auth" 'https://web-production.lime.bike/api/rider/v1/views/map?ne_lat=47.495&ne_lng=19.045&sw_lat=47.505&sw_lng=19.055&user_latitude=47.48&user_longitude=19.0484594&zoom=12.0' |
+	jq -r '.data.attributes.zones[].attributes.polyline' | /home/akos/scripts/polyline.js | jq -s '.[] | {service: "lime", coords: ., holes:[]}'
+}
+
+cat <(gg &) <(ml &) <(bl &) <(lm &) | jq -s | sponge "$vehicle_file"
+cat <(gg_zone &) <(ml_zone &) <(bl_zone &) <(lm_zone &) | jq -s | sponge "$zone_file"
+
+#lime_recursive_download 47.45 18.99 47.55 19.16 | tee /tmp/tty

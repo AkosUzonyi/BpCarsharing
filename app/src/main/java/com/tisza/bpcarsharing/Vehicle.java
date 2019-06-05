@@ -23,9 +23,14 @@ public class Vehicle
 		return BuildConfig.DEBUG || category.getFuel() == Fuel.ELECTRICITY;
 	}
 
-	public String getId()
+	public String getID()
 	{
 		return id;
+	}
+
+	public String getUID()
+	{
+		return category.getCarsharingService().getID() + id;
 	}
 
 	public double getLat()

@@ -49,7 +49,7 @@ public class VehicleMarkerManager
 	{
 		vehicles.clear();
 		for (Vehicle vehicle : newVehicles)
-			vehicles.put(vehicle.getId(), vehicle);
+			vehicles.put(vehicle.getUID(), vehicle);
 
 		updateMarkers();
 	}

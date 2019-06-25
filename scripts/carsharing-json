@@ -29,7 +29,7 @@ lime_recursive_download() {
 	local in_range_count=$(echo "$json" | jq -c ".data.attributes.bikes[].attributes | select(.latitude>=$ne_lat and .latitude<=$sw_lat and .longitude>=$ne_lng and .longitude<=$sw_lng)" | wc -l)
 
 	if ((in_range_count < 30)); then
-		echo "$json" | jq '.data.attributes.bikes[] // empty'
+		echo "$json" | jq '.data.attributes.bikes[] //empty'
 		return 0
 	fi
 
@@ -76,7 +76,7 @@ ml_zone() {
 
 bl_zone() {
 	curl 'https://blinkee.city/api/regions' |
-	jq '.[] | select(.id == 11) | .zones[0].area.coordinates[] | {service: "blinkee", coords: (.[0] | map({lat: .[0], lng: .[1]})), holes:[(.[1] | map({lat: .[0], lng: .[1]}))]}'
+	jq '.[] | select(.id == 11) | .zones[0].area.coordinates[] | {service: "blinkee", coords: (.[0] | map({lat: .[0], lng: .[1]})), holes:[(.[1] //empty | map({lat: .[0], lng: .[1]}))]}'
 }
 
 lm_zone() {

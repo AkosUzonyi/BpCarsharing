@@ -10,6 +10,11 @@ curl() {
 	command curl 2>/dev/null "$@"
 }
 
+#write one json object per line, and force line buffering to avoid paralell jq writes corrupt each other
+jq() {
+	stdbuf -oL jq -c "$@"
+}
+
 vehicle_file="$1"
 zone_file="$2"
 
@@ -35,10 +40,10 @@ lime_recursive_download() {
 
 	lat_avg=$(bc <<< "scale=5; ($ne_lat + $sw_lat) / 2")
 	lng_avg=$(bc <<< "scale=5; ($ne_lng + $sw_lng) / 2")
-	lime_recursive_download $ne_lat $ne_lng $lat_avg $lng_avg
-	lime_recursive_download $ne_lat $lng_avg $lat_avg $sw_lng
-	lime_recursive_download $lat_avg $ne_lng $sw_lat $lng_avg
-	lime_recursive_download $lat_avg $lng_avg $sw_lat $sw_lng
+	lime_recursive_download $ne_lat $ne_lng $lat_avg $lng_avg &
+	lime_recursive_download $ne_lat $lng_avg $lat_avg $sw_lng &
+	lime_recursive_download $lat_avg $ne_lng $sw_lat $lng_avg &
+	lime_recursive_download $lat_avg $lng_avg $sw_lat $sw_lng &
 }
 
 gg() {
@@ -84,7 +89,23 @@ lm_zone() {
 	jq -r '.data.attributes.zones[].attributes.polyline' | /home/akos/scripts/polyline.js | jq -s '.[] | {service: "lime", coords: ., holes:[]}'
 }
 
-cat <(gg &) <(ml &) <(bl &) <(lm &) | jq -s | sponge "$vehicle_file"
-cat <(gg_zone &) <(ml_zone &) <(bl_zone &) <(lm_zone &) | jq -s | sponge "$zone_file"
+all() {
+	gg &
+	ml &
+	bl &
+	lm &
+}
+
+all_zone() {
+	gg_zone &
+	ml_zone &
+	bl_zone &
+	lm_zone &
+}
+
+all | jq -s | sponge "$vehicle_file"
+all_zone | jq -s | sponge "$zone_file"
+
+wait
 
 #lime_recursive_download 47.45 18.99 47.55 19.16 | tee /tmp/tty

@@ -71,12 +71,12 @@ lm() {
 
 gg_zone() {
 	curl 'https://www.greengo.hu' | grep -Po 'var area = \K[^;]*' |
-	jq -r '.[].area' | jq -s '.[] | {service: "greengo", coords: map({lat: .[1], lng:.[0]}), holes:[]}'
+	jq -r '.[].area' | jq '{service: "greengo", coords: map({lat: .[1], lng:.[0]}), holes:[]}'
 }
 
 ml_zone() {
 	curl 'https://www.mollimo.hu/data/homezone.js?Isg7gJs12R' | grep -Po '\[.*?\]' |
-	jq -s '.[] | {service: "mollimo", coords: ., holes:[]}'
+	jq '{service: "mollimo", coords: ., holes:[]}'
 }
 
 bl_zone() {
@@ -86,7 +86,7 @@ bl_zone() {
 
 lm_zone() {
 	curl -H "$lm_auth" 'https://web-production.lime.bike/api/rider/v1/views/map?ne_lat=47.495&ne_lng=19.045&sw_lat=47.505&sw_lng=19.055&user_latitude=47.48&user_longitude=19.0484594&zoom=12.0' |
-	jq -r '.data.attributes.zones[].attributes.polyline' | /home/akos/scripts/polyline.js | jq -s '.[] | {service: "lime", coords: ., holes:[]}'
+	jq -r '.data.attributes.zones[].attributes.polyline' | /home/akos/scripts/polyline.js | jq '{service: "lime", coords: ., holes:[]}'
 }
 
 all() {

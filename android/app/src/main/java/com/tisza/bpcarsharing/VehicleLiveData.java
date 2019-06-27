@@ -1,27 +1,25 @@
 package com.tisza.bpcarsharing;
 
+import android.arch.lifecycle.*;
 import android.os.*;
 import org.json.*;
 
 import java.util.*;
 
-public class VehicleDownloader
+public class VehicleLiveData extends LiveData<Collection<Vehicle>>
 {
 	private final Runnable downloadCarsRunnable = this::downloadCars;
 	private final Handler handler;
-	private final VehiclesDownloadedListener vehiclesDownloadedListener;
 	private final ProgressBarHandler progressBarHandler;
 
-	private boolean active = false;
 	private int downloadInterval;
 	private VehicleDownloadAsyncTask currentDownloadTask = null;
 	private boolean newDownloadRequestPending = false;
 
-	public VehicleDownloader(Looper looper, int downloadInterval, VehiclesDownloadedListener vehiclesDownloadedListener, ProgressBarHandler progressBarHandler)
+	public VehicleLiveData(Looper looper, int downloadInterval, ProgressBarHandler progressBarHandler)
 	{
 		handler = new Handler(looper);
 		this.downloadInterval = downloadInterval;
-		this.vehiclesDownloadedListener = vehiclesDownloadedListener;
 		this.progressBarHandler = progressBarHandler;
 	}
 
@@ -30,26 +28,17 @@ public class VehicleDownloader
 		this.downloadInterval = downloadInterval;
 	}
 
-	public void start()
+	@Override
+	protected void onActive()
 	{
-		if (active)
-			return;
-
-		active = true;
 		downloadCars();
 	}
 
-	public void stop()
+	@Override
+	protected void onInactive()
 	{
-		if (!active)
-			return;
-
-		active = false;
-
 		if (currentDownloadTask != null)
 			currentDownloadTask.cancel(true);
-
-		vehiclesDownloadedListener.onVehiclesDowloaded(Collections.EMPTY_LIST);
 	}
 
 	private void downloadCars()
@@ -57,7 +46,7 @@ public class VehicleDownloader
 		handler.removeCallbacks(downloadCarsRunnable);
 		newDownloadRequestPending = false;
 
-		if (!active)
+		if (!hasActiveObservers())
 			return;
 
 		if (currentDownloadTask != null)
@@ -118,13 +107,14 @@ public class VehicleDownloader
 		@Override
 		protected void onPostExecute(Collection<Vehicle> downloadedVehicles)
 		{
-			vehiclesDownloadedListener.onVehiclesDowloaded(downloadedVehicles);
+			setValue(downloadedVehicles);
 			onFinished();
 		}
 
 		@Override
 		protected void onCancelled()
 		{
+			setValue(Collections.EMPTY_LIST);
 			onFinished();
 		}
 
@@ -136,10 +126,5 @@ public class VehicleDownloader
 			if (newDownloadRequestPending)
 				downloadCars();
 		}
-	}
-
-	public static interface VehiclesDownloadedListener
-	{
-		public void onVehiclesDowloaded(Collection<? extends Vehicle> vehicles);
 	}
 }

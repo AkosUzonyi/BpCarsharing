@@ -1,7 +1,6 @@
 package com.tisza.bpcarsharing;
 
 import android.*;
-import android.app.*;
 import android.content.*;
 import android.content.pm.*;
 import android.location.*;
@@ -12,12 +11,13 @@ import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.support.v4.widget.*;
 import android.support.v7.app.*;
-import android.support.v7.app.ActionBar;
 import android.view.*;
 import android.widget.*;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+
+import java.util.*;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, NetworkStateReceiver.NetworkStateListener
 {
@@ -38,7 +38,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	private ProgressBarHandler progressBarHandler;
 
 	private VehicleMarkerManager vehicleMarkerManager;
-	private VehicleDownloader vehicleDownloader;
+	private VehicleLiveData vehicleLiveData;
 	private ZoneDownloader zoneDownloader;
 
 	@Override
@@ -69,7 +69,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 		SharedPreferences sharedPreferences = getSharedPreferences(SP_NAME_SWITCH, Context.MODE_PRIVATE);
 		vehicleMarkerManager = new VehicleMarkerManager();
-		vehicleDownloader = new VehicleDownloader(getMainLooper(), DOWNLOAD_INTERVAL, vehicleMarkerManager::setVehicles, progressBarHandler);
+		vehicleLiveData = new VehicleLiveData(getMainLooper(), DOWNLOAD_INTERVAL, progressBarHandler);
 		zoneDownloader = new ZoneDownloader(progressBarHandler);
 		for (CarsharingService carsharingService : CarsharingService.values())
 		{
@@ -151,7 +151,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	{
 		super.onStop();
 		unregisterReceiver(networkStateReceiver);
-		setDownloadingActive(false);
 
 		SharedPreferences sharedPreferences = getSharedPreferences(SP_NAME_SWITCH, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -185,18 +184,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	@Override
 	public void networkConnectionStateChanged(boolean isConnected)
 	{
-		setDownloadingActive(isConnected);
-
 		if (isConnected)
+		{
 			if (!zoneDownloader.isReady())
 				zoneDownloader.download();
-	}
 
-	private void setDownloadingActive(boolean active)
-	{
-		if (active)
-			vehicleDownloader.start();
+			vehicleLiveData.observe(this, vehicleMarkerManager::setVehicles);
+		}
 		else
-			vehicleDownloader.stop();
+		{
+			vehicleLiveData.removeObservers(this);
+			vehicleMarkerManager.setVehicles(Collections.EMPTY_LIST);
+		}
 	}
 }

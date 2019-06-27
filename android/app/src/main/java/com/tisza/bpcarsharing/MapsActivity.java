@@ -11,13 +11,15 @@ import android.support.design.widget.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.support.v4.widget.*;
+import android.support.v7.app.*;
+import android.support.v7.app.ActionBar;
 import android.view.*;
 import android.widget.*;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
-public class MapsActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, NetworkStateReceiver.NetworkStateListener
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, NetworkStateReceiver.NetworkStateListener
 {
 	private static final String SP_NAME_SWITCH = "switch";
 	private static final String SP_KEY_CAR = "car";
@@ -60,8 +62,8 @@ public class MapsActivity extends Activity implements OnMapReadyCallback, Google
 
 		LocationServices.getFusedLocationProviderClient(this).getLastLocation().addOnSuccessListener(this, this::onLocationFound);
 
-		setActionBar(findViewById(R.id.toolbar));
-		ActionBar actionBar = getActionBar();
+		setSupportActionBar(findViewById(R.id.toolbar));
+		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
 

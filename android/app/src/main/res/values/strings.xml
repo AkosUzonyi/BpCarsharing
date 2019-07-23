@@ -7,5 +7,11 @@
     <string name="blinkee">Blinkee</string>
     <string name="lime">Lime</string>
 
+    <string name="up">Up</string>
+    <string name="eup">eUp</string>
+    <string name="mercedes">Mercedes</string>
+    <string name="smart2">Smart 2</string>
+    <string name="smart4">Smart 4</string>
+
     <string name="app_not_installed">Az alkalmazás nincs telepítve</string>
 </resources>

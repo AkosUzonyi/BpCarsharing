@@ -92,7 +92,13 @@ public class VehicleLiveData extends LiveData<Collection<Vehicle>>
 					int charge = vehicleJSON.optInt("charge", 0);
 					String model = vehicleJSON.optString("model", null);
 
-					vehicles.add(new Vehicle(id, lat, lng, plate, range, VehicleCategory.fromModel(CarsharingService.fromString(provider), model)));
+					CarsharingService carsharingService = CarsharingService.fromString(provider);
+					if (carsharingService == null)
+						continue;
+					VehicleCategory vehicleCategory = VehicleCategory.fromModel(carsharingService, model);
+					if (vehicleCategory == null)
+						continue;
+					vehicles.add(new Vehicle(id, lat, lng, plate, range, vehicleCategory));
 				}
 
 				return vehicles;

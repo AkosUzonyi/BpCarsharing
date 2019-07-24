@@ -1,6 +1,6 @@
 package com.tisza.bpcarsharing;
 
-import android.arch.lifecycle.*;
+import androidx.lifecycle.*;
 import android.os.*;
 import org.json.*;
 

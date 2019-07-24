@@ -6,16 +6,16 @@ import android.content.pm.*;
 import android.location.*;
 import android.net.*;
 import android.os.*;
-import android.support.design.widget.*;
-import android.support.v4.app.*;
-import android.support.v4.content.*;
-import android.support.v4.widget.*;
-import android.support.v7.app.*;
 import android.view.*;
 import android.widget.*;
+import androidx.appcompat.app.*;
+import androidx.core.app.*;
+import androidx.core.content.*;
+import androidx.drawerlayout.widget.*;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+import com.google.android.material.navigation.*;
 
 import java.util.*;
 

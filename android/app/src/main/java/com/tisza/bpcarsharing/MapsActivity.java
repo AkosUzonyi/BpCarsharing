@@ -24,6 +24,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	private static final String SP_NAME_SWITCH = "switch";
 	private static final String SP_KEY_CAR = "car";
 	private static final String SP_KEY_ZONE = "zone";
+	private static final String SP_KEY_LIME_WARNING_DISMISS = "lime_warning_dismiss";
 
 	private static final int DOWNLOAD_INTERVAL = 40;
 	private static final LatLng BP_CENTER = new LatLng(47.495225, 19.045508);
@@ -33,6 +34,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	private NetworkStateReceiver networkStateReceiver;
 	private DrawerLayout drawerLayout;
 	private NavigationView navigationView;
+	private View limeWarningView;
 	private GoogleMap map;
 
 	private ProgressBarHandler progressBarHandler;
@@ -81,6 +83,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> zoneDownloader.setCarsharingServiceVisible(carsharingService, isChecked));
 			zoneSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_ZONE + carsharingService.getID(), false));
 		}
+
+		limeWarningView = navigationView.getMenu().findItem(R.id.lime_warning).getActionView();
+		if (sharedPreferences.getBoolean(SP_KEY_LIME_WARNING_DISMISS, false))
+			limeWarningView.setVisibility(View.GONE);
+		else
+			limeWarningView.findViewById(R.id.lime_warning_button).setOnClickListener(v -> limeWarningView.setVisibility(View.GONE));
 	}
 
 	@Override
@@ -162,6 +170,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
 			editor.putBoolean(SP_KEY_ZONE + carsharingService.getID(), zoneSwitch.isChecked());
 		}
+		editor.putBoolean(SP_KEY_LIME_WARNING_DISMISS, limeWarningView.getVisibility() == View.GONE);
 		editor.apply();
 	}
 

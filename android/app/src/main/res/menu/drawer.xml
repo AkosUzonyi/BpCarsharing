@@ -31,6 +31,10 @@
                 android:title="@string/lime"
                 app:actionLayout="@layout/carsharing_service_switch"
             />
+            <item
+                android:id="@+id/lime_warning"
+                app:actionLayout="@layout/lime_warning"
+            />
         </menu>
     </item>
 </menu>

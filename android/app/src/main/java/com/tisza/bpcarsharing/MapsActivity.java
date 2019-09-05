@@ -43,6 +43,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	private VehicleLiveData vehicleLiveData;
 	private ZoneDownloader zoneDownloader;
 
+	private boolean limeWarningDismissed = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -86,9 +88,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 		limeWarningView = navigationView.getMenu().findItem(R.id.lime_warning).getActionView();
 		if (sharedPreferences.getBoolean(SP_KEY_LIME_WARNING_DISMISS, false))
-			limeWarningView.setVisibility(View.GONE);
+			limeWarningDismiss();
 		else
-			limeWarningView.findViewById(R.id.lime_warning_button).setOnClickListener(v -> limeWarningView.setVisibility(View.GONE));
+			limeWarningView.findViewById(R.id.lime_warning_button).setOnClickListener(v -> limeWarningDismiss());
+	}
+
+	private void limeWarningDismiss()
+	{
+		navigationView.getMenu().findItem(R.id.lime_warning).setVisible(false);
+		limeWarningDismissed = true;
 	}
 
 	@Override
@@ -170,7 +178,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			Switch zoneSwitch = navigationView.getMenu().findItem(carsharingService.getMenuID()).getActionView().findViewById(R.id.zone_switch);
 			editor.putBoolean(SP_KEY_ZONE + carsharingService.getID(), zoneSwitch.isChecked());
 		}
-		editor.putBoolean(SP_KEY_LIME_WARNING_DISMISS, limeWarningView.getVisibility() == View.GONE);
+		editor.putBoolean(SP_KEY_LIME_WARNING_DISMISS, limeWarningDismissed);
 		editor.apply();
 	}
 

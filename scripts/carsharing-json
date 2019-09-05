@@ -91,7 +91,7 @@ bl_zone() {
 
 lm_zone() {
 	curl -H "$lm_auth" 'https://web-production.lime.bike/api/rider/v1/views/map?ne_lat=47.495&ne_lng=19.045&sw_lat=47.505&sw_lng=19.055&user_latitude=47.48&user_longitude=19.0484594&zoom=12.0' |
-	jq -r '.data.attributes.zones[].attributes.polyline' | /home/akos/scripts/polyline.js | jq '{service: "lime", coords: ., holes:[]}'
+	jq -r '.data.attributes.zones[].attributes.polyline' | polyline.js | jq '{service: "lime", coords: ., holes:[]}'
 }
 
 og_zone() {

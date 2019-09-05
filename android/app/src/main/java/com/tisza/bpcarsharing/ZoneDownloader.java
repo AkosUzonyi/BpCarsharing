@@ -103,19 +103,30 @@ public class ZoneDownloader
 		@Override
 		protected List<Shape> doInBackground(Void... voids)
 		{
+			List<Shape> zone = new ArrayList<>();
+			JSONArray jsonArray;
+
 			try
 			{
-				List<Shape> zone = new ArrayList<>();
-
 				String jsonText = Utils.downloadText("http://akos0.ddns.net/carsharing/zones");
-				JSONArray jsonArray = new JSONArray(jsonText);
+				jsonArray = new JSONArray(jsonText);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				return zone;
+			}
 
-				for (int i = 0; i < jsonArray.length(); i++)
+			for (int i = 0; i < jsonArray.length(); i++)
+			{
+				try
 				{
 					JSONObject shapeJSON = jsonArray.getJSONObject(i);
 					Shape shape = new Shape();
 
 					shape.carsharingService = CarsharingService.fromString(shapeJSON.getString("service"));
+					if (shape.carsharingService == null)
+						continue;
 					parseShape(shapeJSON.getJSONArray("coords"), shape.coords);
 
 					JSONArray holesJSON = shapeJSON.getJSONArray("holes");
@@ -128,14 +139,13 @@ public class ZoneDownloader
 
 					zone.add(shape);
 				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
 
-				return zone;
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				return null;
-			}
+			return zone;
 		}
 
 		@Override

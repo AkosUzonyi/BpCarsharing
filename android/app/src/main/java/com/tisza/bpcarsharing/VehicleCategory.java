@@ -12,6 +12,7 @@ public enum VehicleCategory
 	MOL_LIMO_MERCEDES(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_VIOLET, Fuel.PETROL),
 	BLINKEE(CarsharingService.BLINKEE, BitmapDescriptorFactory.HUE_ORANGE, Fuel.ELECTRICITY),
 	LIME_S(CarsharingService.LIME, BitmapDescriptorFactory.HUE_YELLOW, Fuel.ELECTRICITY),
+	OGRE_CO(CarsharingService.OGRE_CO, BitmapDescriptorFactory.HUE_VIOLET + 20, Fuel.ELECTRICITY),
 	;
 
 	private final CarsharingService carsharingService;
@@ -57,6 +58,7 @@ public enum VehicleCategory
 				}
 			case BLINKEE: return VehicleCategory.BLINKEE;
 			case LIME: return VehicleCategory.LIME_S;
+			case OGRE_CO: return VehicleCategory.OGRE_CO;
 			default: return null;
 		}
 	}

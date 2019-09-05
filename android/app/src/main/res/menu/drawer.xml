@@ -35,6 +35,11 @@
                 android:id="@+id/lime_warning"
                 app:actionLayout="@layout/lime_warning"
             />
+            <item
+                android:id="@+id/ogreco_swicth"
+                android:title="@string/ogreco"
+                app:actionLayout="@layout/carsharing_service_switch"
+            />
         </menu>
     </item>
 </menu>

@@ -69,6 +69,11 @@ lm() {
 	jq -s 'unique_by(.attributes.plate_number)[] | {service: "lime", id: .id, plate: .attributes.plate_number, lat: .attributes.latitude, lng: .attributes.longitude, range: (.attributes.meter_range/1000), model: .attributes.type_name}'
 }
 
+og() {
+	curl -k -H 'Host:core.ogreco.playmoove.com' 'https://3.120.244.24/api/v1/public_search?start=1567683951&end=1567687551&booking_mode=FF&latitude=47.5&longitude=19.05&vehicle_type_id=VEWwEX' |
+	jq '.[] | select(.vehicle.plate != "TESZT") | {service: "ogreco", id: .id, plate: .vehicle.plate, lat: .position.latitude, lng: .position.longitude, range: (.vehicle.fuel_level * 0.45) , model: .vehicle.category.name}'
+}
+
 gg_zone() {
 	curl 'https://www.greengo.hu' | grep -Po 'var area = \K[^;]*' |
 	jq -r '.[].area' | jq '{service: "greengo", coords: map({lat: .[1], lng:.[0]}), holes:[]}'
@@ -89,11 +94,17 @@ lm_zone() {
 	jq -r '.data.attributes.zones[].attributes.polyline' | /home/akos/scripts/polyline.js | jq '{service: "lime", coords: ., holes:[]}'
 }
 
+og_zone() {
+	curl -k -H 'Host:core.ogreco.playmoove.com' 'https://3.120.244.24/api/frontoffice/v2/public/vehicle_slot/Ym5gLE/zones' |
+	jq '.allowed.poly | map({service: "ogreco", coords: ., holes: []}) | .[]'
+}
+
 all() {
 	gg &
 	ml &
 	bl &
 	lm &
+	og &
 }
 
 all_zone() {
@@ -101,6 +112,7 @@ all_zone() {
 	ml_zone &
 	bl_zone &
 	lm_zone &
+	og_zone &
 }
 
 all | jq -s | sponge "$vehicle_file"

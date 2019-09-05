@@ -8,6 +8,7 @@ public enum CarsharingService
 	MOLLIMO("mollimo", Color.BLUE, "com.vulog.carshare.mol", R.id.mollimo_switch),
 	BLINKEE("blinkee", Color.rgb(255, 180, 0), "pl.blinkee.mobile", R.id.blinkee_swicth),
 	LIME("lime", Color.YELLOW, "com.limebike", R.id.lime_swicth),
+	OGRE_CO("ogreco", Color.rgb(160, 0, 160), "com.playmoove.ogreco", R.id.ogreco_swicth),
 	;
 
 	private final String id;

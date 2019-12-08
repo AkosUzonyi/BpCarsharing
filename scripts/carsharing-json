@@ -103,7 +103,7 @@ all() {
 	gg &
 	ml &
 	bl &
-	lm &
+#	lm &
 	og &
 }
 
@@ -111,7 +111,7 @@ all_zone() {
 	gg_zone &
 	ml_zone &
 	bl_zone &
-	lm_zone &
+#	lm_zone &
 	og_zone &
 }
 

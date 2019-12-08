@@ -47,7 +47,7 @@ lime_recursive_download() {
 }
 
 gg() {
-	curl -g 'https://www.greengo.hu/divcontent.php?rnd=0.7767208702313471&funct=callAPI&APIname=getVehicleList&params\[P_ICON_SIZE\]=48&_=153782523104'  -H 'Referer: https://www.greengo.hu/' -H 'X-Requested-With: XMLHttpRequest' |
+	curl -g 'https://greengo.com/hu/divcontent.php?rnd=0.1027414351854744&funct=callAPI&APIname=getVehicleList&params[P_ICON_SIZE]=48&_=1575812817235'  -H 'Referer: https://greengo.com/hu/?lang=EN&' -H 'X-Requested-With: XMLHttpRequest' |
 	jq '.[] | {service: "greengo", id: .vehicle_id, plate: .plate_number, lat: .gps_lat, lng: .gps_long, range: .estimated_km, model: .make_desc}'
 }
 
@@ -75,7 +75,7 @@ og() {
 }
 
 gg_zone() {
-	curl 'https://www.greengo.hu' | grep -Po 'var area = \K[^;]*' |
+	curl 'https://www.greengo.com/hu/' | grep -Po 'var area = \K[^;]*' |
 	jq -r '.[].area' | jq '{service: "greengo", coords: map({lat: .[1], lng:.[0]}), holes:[]}'
 }
 

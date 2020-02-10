@@ -85,18 +85,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> zoneDownloader.setCarsharingServiceVisible(carsharingService, isChecked));
 			zoneSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_ZONE + carsharingService.getID(), false));
 		}
-
-		limeWarningView = navigationView.getMenu().findItem(R.id.lime_warning).getActionView();
-		if (sharedPreferences.getBoolean(SP_KEY_LIME_WARNING_DISMISS, false))
-			limeWarningDismiss();
-		else
-			limeWarningView.findViewById(R.id.lime_warning_button).setOnClickListener(v -> limeWarningDismiss());
-	}
-
-	private void limeWarningDismiss()
-	{
-		navigationView.getMenu().findItem(R.id.lime_warning).setVisible(false);
-		limeWarningDismissed = true;
 	}
 
 	@Override

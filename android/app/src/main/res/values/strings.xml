@@ -5,7 +5,6 @@
     <string name="greengo">GreenGo</string>
     <string name="mollimo">MOL Limo</string>
     <string name="blinkee">Blinkee</string>
-    <string name="lime">Lime</string>
     <string name="ogreco">ogre&amp;co</string>
 
     <string name="up">Up</string>
@@ -15,6 +14,5 @@
     <string name="smart4">Smart 4</string>
 
     <string name="app_not_installed">Az alkalmazás nincs telepítve</string>
-    <string name="lime_warning">Előfordulhat hogy egyes Lime-S rollerek nem jelennek meg a térképen</string>
     <string name="ok">OK</string>
 </resources>

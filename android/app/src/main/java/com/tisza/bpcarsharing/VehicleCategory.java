@@ -1,5 +1,6 @@
 package com.tisza.bpcarsharing;
 
+import android.util.*;
 import com.google.android.gms.maps.model.*;
 
 public enum VehicleCategory
@@ -9,11 +10,14 @@ public enum VehicleCategory
 	MOL_LIMO_EUP(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_AZURE - 15, Fuel.ELECTRICITY),
 	MOL_LIMO_SMART2(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_AZURE - 30, Fuel.ELECTRICITY),
 	MOL_LIMO_SMART4(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_AZURE - 15, Fuel.ELECTRICITY),
+	MOL_LIMO_KIA(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_BLUE, Fuel.PETROL),
 	MOL_LIMO_MERCEDES(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_VIOLET, Fuel.PETROL),
 	BLINKEE(CarsharingService.BLINKEE, BitmapDescriptorFactory.HUE_ORANGE, Fuel.ELECTRICITY),
 	LIME_S(CarsharingService.LIME, BitmapDescriptorFactory.HUE_YELLOW, Fuel.ELECTRICITY),
 	OGRE_CO(CarsharingService.OGRE_CO, BitmapDescriptorFactory.HUE_VIOLET + 20, Fuel.ELECTRICITY),
 	;
+
+	private static final String TAG = "VehicleCategory";
 
 	private final CarsharingService carsharingService;
 	private final float hue;
@@ -53,13 +57,18 @@ public enum VehicleCategory
 					case "eUp": return VehicleCategory.MOL_LIMO_EUP;
 					case "Smart 2": return VehicleCategory.MOL_LIMO_SMART2;
 					case "Smart 4": return VehicleCategory.MOL_LIMO_SMART4;
-					case "Mercedes": return VehicleCategory.MOL_LIMO_MERCEDES;
-					default: return null;
+					case "Kia Picanto": return VehicleCategory.MOL_LIMO_KIA;
+					case "Mercedes A": case "Mercedes CLA": case "Mercedes CLA SB": return VehicleCategory.MOL_LIMO_MERCEDES;
+					default:
+						Log.w(TAG, "unknown mol limo vehicle: " + model);
+						return MOL_LIMO_UP;
 				}
 			case BLINKEE: return VehicleCategory.BLINKEE;
 			case LIME: return VehicleCategory.LIME_S;
 			case OGRE_CO: return VehicleCategory.OGRE_CO;
-			default: return null;
+			default:
+				Log.w(TAG, "unknown carsharing service: " + carsharingService);
+				return null;
 		}
 	}
 }

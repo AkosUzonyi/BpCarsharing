@@ -108,7 +108,7 @@ public class ZoneDownloader
 
 			try
 			{
-				String jsonText = Utils.downloadText("http://akos0.ddns.net/carsharing/zones");
+				String jsonText = Utils.downloadText("https://tarokk.net/carsharing/zones");
 				jsonArray = new JSONArray(jsonText);
 			}
 			catch (Exception e)

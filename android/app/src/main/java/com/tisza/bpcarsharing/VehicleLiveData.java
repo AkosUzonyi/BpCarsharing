@@ -76,7 +76,7 @@ public class VehicleLiveData extends LiveData<Collection<Vehicle>>
 			{
 				Collection<Vehicle> vehicles = new ArrayList<>();
 
-				String jsonText = Utils.downloadText("http://akos0.ddns.net/carsharing/vehicles");
+				String jsonText = Utils.downloadText("https://tarokk.net/carsharing/vehicles");
 				JSONArray jsonArray = new JSONArray(jsonText);
 
 				for (int i = 0; i < jsonArray.length(); i++)

@@ -6,6 +6,7 @@ import android.content.pm.*;
 import android.location.*;
 import android.net.*;
 import android.os.*;
+import android.text.*;
 import android.view.*;
 import android.widget.*;
 import androidx.appcompat.app.*;
@@ -85,6 +86,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			zoneSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> zoneDownloader.setCarsharingServiceVisible(carsharingService, isChecked));
 			zoneSwitch.setChecked(sharedPreferences.getBoolean(SP_KEY_ZONE + carsharingService.getID(), false));
 		}
+
+		EditText plateSearchEditText = navigationView.getMenu().findItem(R.id.plate_search).getActionView().findViewById(R.id.plate_search_edittext);
+		plateSearchEditText.addTextChangedListener(new TextWatcher()
+		{
+			@Override
+			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+			{
+			}
+
+			@Override
+			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+			{
+				vehicleMarkerManager.setPlateSearchString(charSequence.toString());
+			}
+
+			@Override
+			public void afterTextChanged(Editable editable)
+			{
+			}
+		});
 	}
 
 	@Override

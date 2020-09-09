@@ -11,6 +11,7 @@ public class VehicleMarkerManager
 	private Map<String, Vehicle> vehicles = new HashMap<>();
 	private Map<String, Marker> markers = new HashMap<>();
 	private Set<CarsharingService> visibleServices = new HashSet<>();
+	private String plateSearchString = null;
 
 	private GoogleMap map;
 
@@ -35,14 +36,7 @@ public class VehicleMarkerManager
 		else
 			visibleServices.remove(carsharingService);
 
-		for (Map.Entry<String, Marker> entry : markers.entrySet())
-		{
-			String id = entry.getKey();
-			Marker marker = entry.getValue();
-
-			if (vehicles.get(id).getCategory().getCarsharingService() == carsharingService)
-				marker.setVisible(visible);
-		}
+		updateMarkerVisibility();
 	}
 
 	public void setVehicles(Collection<? extends Vehicle> newVehicles)
@@ -52,6 +46,30 @@ public class VehicleMarkerManager
 			vehicles.put(vehicle.getUID(), vehicle);
 
 		updateMarkers();
+	}
+
+	public void setPlateSearchString(String str)
+	{
+		plateSearchString = str == null ? null : str.toLowerCase();
+		updateMarkerVisibility();
+	}
+
+	private boolean isVehicleVisible(Vehicle vehicle)
+	{
+		boolean serviceVisible = visibleServices.contains(vehicle.getCategory().getCarsharingService());
+		boolean plateSearchMatch = plateSearchString == null || vehicle.getPlate().toLowerCase().contains(plateSearchString);
+
+		return serviceVisible && plateSearchMatch;
+	}
+
+	private void updateMarkerVisibility()
+	{
+		for (Map.Entry<String, Marker> entry : markers.entrySet())
+		{
+			String id = entry.getKey();
+			Marker marker = entry.getValue();
+			marker.setVisible(isVehicleVisible(vehicles.get(id)));
+		}
 	}
 
 	private void updateMarkers()
@@ -102,7 +120,7 @@ public class VehicleMarkerManager
 				markerOptions.title(vehicle.getPlate());
 				markerOptions.snippet(vehicle.getRange() + " km");
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
-				markerOptions.visible(visibleServices.contains(vehicle.getCategory().getCarsharingService()));
+				markerOptions.visible(isVehicleVisible(vehicle));
 
 				marker = map.addMarker(markerOptions);
 				markers.put(id, marker);
@@ -113,7 +131,7 @@ public class VehicleMarkerManager
 				marker.setTitle(vehicle.getPlate());
 				marker.setSnippet(vehicle.getRange() + " km");
 				marker.setIcon(BitmapDescriptorFactory.defaultMarker(vehicle.getCategory().getHue()));
-				marker.setVisible(visibleServices.contains(vehicle.getCategory().getCarsharingService()));
+				marker.setVisible(isVehicleVisible(vehicle));
 			}
 			marker.setTag(vehicle);
 		}

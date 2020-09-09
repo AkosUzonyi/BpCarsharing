@@ -4,6 +4,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <item
+        android:title="@string/filter"
+        >
+        <menu>
+            <item
+                android:id="@+id/plate_search"
+                android:title="@string/plate_search"
+                app:actionLayout="@layout/plate_search_edittext"
+            />
+        </menu>
+    </item>
+    <item
         android:title="@string/vehicles"
         >
         <menu>

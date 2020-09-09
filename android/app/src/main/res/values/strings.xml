@@ -7,6 +7,9 @@
     <string name="blinkee">Blinkee</string>
     <string name="ogreco">ogre&amp;co</string>
 
+    <string name="filter">Szűrés</string>
+    <string name="plate_search">Rendszám</string>
+
     <string name="up">Up</string>
     <string name="eup">eUp</string>
     <string name="mercedes">Mercedes</string>

@@ -5,7 +5,8 @@ android {
     defaultConfig {
         applicationId "com.tisza.bpcarsharing"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 30
+        compileSdkVersion 30
         versionCode 13
         versionName "1.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

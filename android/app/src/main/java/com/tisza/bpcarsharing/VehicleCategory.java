@@ -6,12 +6,8 @@ import com.google.android.gms.maps.model.*;
 public enum VehicleCategory
 {
 	GREENGO(CarsharingService.GREENGO, BitmapDescriptorFactory.HUE_GREEN, Fuel.ELECTRICITY),
-	MOL_LIMO_UP(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_BLUE, Fuel.PETROL),
-	MOL_LIMO_EUP(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_AZURE - 15, Fuel.ELECTRICITY),
-	MOL_LIMO_SMART2(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_AZURE - 30, Fuel.ELECTRICITY),
-	MOL_LIMO_SMART4(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_AZURE - 15, Fuel.ELECTRICITY),
-	MOL_LIMO_KIA(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_BLUE, Fuel.PETROL),
-	MOL_LIMO_MERCEDES(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_VIOLET, Fuel.PETROL),
+	MOL_LIMO_PETROL(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_BLUE, Fuel.PETROL),
+	MOL_LIMO_ELECTRIC(CarsharingService.MOLLIMO, BitmapDescriptorFactory.HUE_AZURE - 15, Fuel.ELECTRICITY),
 	BLINKEE(CarsharingService.BLINKEE, BitmapDescriptorFactory.HUE_ORANGE, Fuel.ELECTRICITY),
 	OGRE_CO(CarsharingService.OGRE_CO, BitmapDescriptorFactory.HUE_VIOLET + 20, Fuel.ELECTRICITY),
 	;
@@ -52,15 +48,21 @@ public enum VehicleCategory
 			case MOLLIMO:
 				switch (model)
 				{
-					case "Up": return VehicleCategory.MOL_LIMO_UP;
-					case "eUp": return VehicleCategory.MOL_LIMO_EUP;
-					case "Smart 2": return VehicleCategory.MOL_LIMO_SMART2;
-					case "Smart 4": return VehicleCategory.MOL_LIMO_SMART4;
-					case "Kia Picanto": return VehicleCategory.MOL_LIMO_KIA;
-					case "Mercedes A": case "Mercedes CLA": case "Mercedes CLA SB": return VehicleCategory.MOL_LIMO_MERCEDES;
+					case "Up":
+					case "Kia Picanto":
+					case "Fiat 500":
+					case "Hyundai Kona":
+					case "Mercedes A":
+					case "Mercedes CLA":
+					case "Mercedes CLA SB":
+						return VehicleCategory.MOL_LIMO_PETROL;
+					case "eUp":
+					case "Smart 2":
+					case "BMW i3":
+						return VehicleCategory.MOL_LIMO_ELECTRIC;
 					default:
 						Log.w(TAG, "unknown mol limo vehicle: " + model);
-						return MOL_LIMO_UP;
+						return MOL_LIMO_PETROL;
 				}
 			case BLINKEE: return VehicleCategory.BLINKEE;
 			case OGRE_CO: return VehicleCategory.OGRE_CO;
